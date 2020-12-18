@@ -60,6 +60,7 @@
         <module>ossreader</module>
         <module>ftpreader</module>
         <module>mongodbreader</module>
+        <module>mongodbregtblreader</module>
         <module>rdbmsreader</module>
         <module>hbase11xreader</module>
         <module>hbase094xreader</module>
