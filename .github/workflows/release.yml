@@ -29,10 +29,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.get_date.outputs.date }}
-          release_name: DataX(zhongjiajie fork)-${{ steps.get_date.outputs.date }}
+          release_name: DataX(phillip2019 fork)-${{ steps.get_date.outputs.date }}
           body: |
             For more information about the diff between alibaba/Datax, please read
-            https://github.com/zhongjiajie/DataX/blob/master/CHANGELOG-BETWEEN-UPSTREAM.md
+            https://github.com/phillip2019/DataX/blob/master/CHANGELOG-BETWEEN-UPSTREAM.md
           draft: false
           prerelease: false
       - name: Upload Release Asset
