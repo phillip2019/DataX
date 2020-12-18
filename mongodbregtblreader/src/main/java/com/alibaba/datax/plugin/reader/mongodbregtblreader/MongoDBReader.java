@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.alibaba.datax.common.element.BoolColumn;
 import com.alibaba.datax.common.element.DateColumn;
@@ -29,6 +31,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -50,7 +53,28 @@ public class MongoDBReader extends Reader {
 
         @Override
         public List<Configuration> split(int adviceNumber) {
-            return CollectionSplitUtil.doSplit(originalConfig, adviceNumber, mongoClient);
+            String dbName = originalConfig.getString(KeyConstant.MONGO_DB_NAME, originalConfig.getString(KeyConstant.MONGO_DATABASE));
+            String collName = originalConfig.getString(KeyConstant.MONGO_COLLECTION_NAME);
+            if(Strings.isNullOrEmpty(dbName) || Strings.isNullOrEmpty(collName) || mongoClient == null) {
+                throw DataXException.asDataXException(MongoDBReaderErrorCode.ILLEGAL_VALUE,
+                        MongoDBReaderErrorCode.ILLEGAL_VALUE.getDescription());
+            }
+
+            List<Configuration> configurationList = new ArrayList<>();
+            if (collName.endsWith("*")) {
+                MongoDatabase database = mongoClient.getDatabase(dbName);
+                String tempColl = collName.substring(0, collName.length() - 1);
+                // 获取所有表名
+                for (String coll : database.listCollectionNames()) {
+                    if (coll.startsWith(tempColl)) {
+                        originalConfig.set(KeyConstant.MONGO_COLLECTION_NAME, coll);
+                        configurationList.addAll(CollectionSplitUtil.doSplit(originalConfig, adviceNumber, mongoClient));
+                    }
+                }
+            } else {
+                configurationList = CollectionSplitUtil.doSplit(originalConfig, adviceNumber, mongoClient);
+            }
+            return configurationList;
         }
 
         @Override
@@ -130,7 +154,9 @@ public class MongoDBReader extends Reader {
                     JSONObject column = (JSONObject)columnItera.next();
                     Object tempCol = item.get(column.getString(KeyConstant.COLUMN_NAME));
                     if (tempCol == null) {
+                        // 文档类型
                         if (KeyConstant.isDocumentType(column.getString(KeyConstant.COLUMN_TYPE))) {
+                            //列名，针对嵌套类型，parentKey.childKey
                             String[] name = column.getString(KeyConstant.COLUMN_NAME).split("\\.");
                             if (name.length > 1) {
                                 Object obj;

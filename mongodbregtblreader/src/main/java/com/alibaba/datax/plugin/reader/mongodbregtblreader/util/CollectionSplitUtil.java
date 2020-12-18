@@ -37,6 +37,7 @@ public class CollectionSplitUtil {
                 MongoDBReaderErrorCode.ILLEGAL_VALUE.getDescription());
         }
 
+        // 主键是否是_id
         boolean isObjectId = isPrimaryIdObjectId(mongoClient, dbName, collName);
 
         List<Range> rangeList = doSplitCollection(adviceNumber, mongoClient, dbName, collName, isObjectId);
@@ -92,6 +93,7 @@ public class CollectionSplitUtil {
         ArrayList<Object> splitPoints = new ArrayList<Object>();
 
         // test if user has splitVector role(clusterManager)
+        // 若有权限，强制分区，分摊读取成本
         boolean supportSplitVector = true;
         try {
             database.runCommand(new Document("splitVector", dbName + "." + collName)
