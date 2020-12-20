@@ -19,6 +19,7 @@ import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.plugin.RecordSender;
 import com.alibaba.datax.common.spi.Reader;
 import com.alibaba.datax.common.util.Configuration;
+import com.alibaba.datax.common.util.HostUtils;
 import com.alibaba.datax.plugin.reader.mongodbregtblreader.util.CollectionSplitUtil;
 import com.alibaba.datax.plugin.reader.mongodbregtblreader.util.MongoUtil;
 import com.alibaba.fastjson.JSON;
@@ -34,6 +35,8 @@ import com.mongodb.client.MongoDatabase;
 import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by jianying.wcj on 2015/3/19 0019.
@@ -41,6 +44,8 @@ import org.bson.types.ObjectId;
  * Modified by mingyan.zc on 2017/7/5.
  */
 public class MongoDBReader extends Reader {
+
+    private static final Logger log = LoggerFactory.getLogger(MongoDBReader.class);
 
     public static class Job extends Reader.Job {
 
@@ -64,8 +69,10 @@ public class MongoDBReader extends Reader {
             if (collName.endsWith("*")) {
                 MongoDatabase database = mongoClient.getDatabase(dbName);
                 String tempColl = collName.substring(0, collName.length() - 1);
+                log.info("starts to get collection names...");
                 // 获取所有表名
                 for (String coll : database.listCollectionNames()) {
+                    log.info("mongoregtbldb get collection name: {}", coll);
                     if (coll.startsWith(tempColl)) {
                         originalConfig.set(KeyConstant.MONGO_COLLECTION_NAME, coll);
                         configurationList.addAll(CollectionSplitUtil.doSplit(originalConfig, adviceNumber, mongoClient));
