@@ -15,6 +15,7 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by jianying.wcj on 2015/3/19 0019.
@@ -56,6 +57,10 @@ public class CollectionSplitUtil {
         MongoDatabase database = mongoClient.getDatabase(dbName);
         MongoCollection<Document> col = database.getCollection(collName);
         Document doc = col.find().limit(1).first();
+        // TODO 真正识别主键
+        if (Objects.isNull(doc)) {
+            return false;
+        }
         Object id = doc.get(KeyConstant.MONGO_PRIMARY_ID);
         if (id instanceof ObjectId) {
             return true;
