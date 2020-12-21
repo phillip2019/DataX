@@ -72,12 +72,12 @@ public class MongoDBReader extends Reader {
                 log.info("starts to get collection names...");
                 // 获取所有表名
                 for (String coll : database.listCollectionNames()) {
-                    log.info("mongoregtbldb get collection name: {}", coll);
+                    log.debug("mongoregtbldb get collection name: {}", coll);
                     if (coll.startsWith(tempColl)) {
-                        log.info("mongoregtbldb dbName: {}, collection name: {}", dbName, coll);
+                        log.debug("mongoregtbldb dbName: {}, collection name: {}", dbName, coll);
                         originalConfig.set(KeyConstant.MONGO_COLLECTION_NAME, coll);
                         List<Configuration> colCfgList = CollectionSplitUtil.doSplit(originalConfig, adviceNumber, mongoClient);
-                        log.info("mongoregtbldb coll: {} cfg size: {}", coll, colCfgList.size());
+                        log.debug("mongoregtbldb coll: {} cfg size: {}", coll, colCfgList.size());
                         configurationList.addAll(colCfgList);
                     }
                 }
