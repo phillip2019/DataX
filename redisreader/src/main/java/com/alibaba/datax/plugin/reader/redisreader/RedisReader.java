@@ -158,22 +158,31 @@ public class RedisReader extends Reader {
          **/
         private List<String> sourceTopic2TargetTopic(final List<String> sourceList) {
             List<String> targetList = new ArrayList<String>();
-            Jedis client = getRedisClient();
-            ScanParams sp = null;
-            ScanResult<String> scanResult = null;
-            for (String s : sourceList) {
-                sp = new ScanParams();
-                sp.count(readBatchCount);
-                sp.match(s);
+            Jedis client = null;
+            try {
+                client = getRedisClient();
+                ScanParams sp = null;
+                ScanResult<String> scanResult = null;
+                for (String s : sourceList) {
+                    sp = new ScanParams();
+                    sp.count(readBatchCount);
+                    sp.match(s);
 
-                String cursor = ScanParams.SCAN_POINTER_START;
-                do {
-                    scanResult = client.scan(cursor, sp);
-                    List<String> keys = scanResult.getResult();
-                    if(keys != null && !keys.isEmpty()) {
-                        targetList.addAll(keys);
-                    }
-                } while (!(cursor = scanResult.getCursor()).equals(SCAN_POINTER_START));
+                    String cursor = ScanParams.SCAN_POINTER_START;
+                    do {
+                        scanResult = client.scan(cursor, sp);
+                        List<String> keys = scanResult.getResult();
+                        if(keys != null && !keys.isEmpty()) {
+                            targetList.addAll(keys);
+                        }
+                    } while (!(cursor = scanResult.getCursor()).equals(SCAN_POINTER_START));
+                }
+            } catch (RuntimeException e) {
+                LOG.error("source topic to target topic failed. source topic: {}", sourceList, e);
+            } finally {
+                if (client != null) {
+                    client.close();
+                }
             }
             return targetList;
         }
@@ -194,7 +203,7 @@ public class RedisReader extends Reader {
             return splitedList;
         }
 
-        private Jedis getRedisClient() {
+        private synchronized Jedis getRedisClient() {
             Jedis redisClient = null;
             try {
                 redisClient = Job.JEDIS_POOL.getResource();
@@ -242,7 +251,7 @@ public class RedisReader extends Reader {
         public void destroy() {
         }
 
-        private Jedis getRedisClient() {
+        private synchronized Jedis getRedisClient() {
             Jedis redisClient = null;
             try {
                 redisClient = Job.JEDIS_POOL.getResource();
