@@ -3,10 +3,39 @@
     "parameter": {
         "host": "localhost",
         "port": 6397,
+        "db": 1,
         "auth": "password",
         "connectionTimeout": 60000,
         "readBatchSize": 5000,
+        "testOnBorrow": false,
+        "maxIdle": 10,
+        "maxTotal": 30,
+        "minIdle": 0,
+        "blockWhenExhausted": true,
+        "jmxEnabled": true,
         "listKey": [],
-        "column": []
+        "column": [
+            "string",
+            "key",
+            "value",
+
+            "list",
+            "key",
+            "value",
+
+            "set",
+            "key",
+            "value",
+
+            "zset",
+            "key",
+            "element",
+            "score",
+
+            "hash",
+            "key",
+            "hKey",
+            "hValue"
+        ]
     }
 }

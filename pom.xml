@@ -62,6 +62,7 @@
         <module>mongodbreader</module>
         <module>mongodbregtblreader</module>
         <module>rdbmsreader</module>
+        <module>redisreader</module>
         <module>hbase11xreader</module>
         <module>hbase094xreader</module>
         <module>tsdbreader</module>

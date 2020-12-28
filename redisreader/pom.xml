@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>redisreader</artifactId>
 	<name>redisreader</name>
-	<description>ReidsReader提供定时扫描List读取数据功能。</description>
+	<description>ReidsReader提供定时扫描List, set, zset, string, hash读取数据功能。</description>
 	<packaging>jar</packaging>
 
 	<dependencies>
@@ -16,8 +16,6 @@
 			<groupId>com.alibaba.datax</groupId>
 			<artifactId>datax-common</artifactId>
 			<version>${datax-project-version}</version>
-			<scope>system</scope>
-            <systemPath>${project.basedir}/../common/target/datax-common-0.0.1-SNAPSHOT.jar</systemPath>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -35,7 +33,7 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>2.9.0</version>
+            <version>3.4.1</version>
         </dependency>
 
 		<dependency>
@@ -66,8 +64,8 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<encoding>${project-sourceEncoding}</encoding>
 				</configuration>
 			</plugin>

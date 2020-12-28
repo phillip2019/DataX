@@ -1,18 +1,18 @@
-# DataX TxtFileReader 说明
+# DataX RedisReader 说明
 
 
 ------------
 
 ## 1 快速介绍
 
-TxtFileReader提供了读取本地文件系统数据存储的能力。在底层实现上，TxtFileReader获取本地文件数据，并转换为DataX传输协议传递给Writer。
+RedisReader提供了读取redis内存数据的能力。在底层实现上，RedisReader获取本地文件数据，并转换为DataX传输协议传递给Writer。
 
 **本地文件内容存放的是一张逻辑意义上的二维表，例如CSV格式的文本信息。**
 
 
 ## 2 功能与限制
 
-TxtFileReader实现了从本地文件读取数据并转为DataX协议的功能，本地文件本身是无结构化数据存储，对于DataX而言，TxtFileReader实现上类比OSSReader，有诸多相似之处。目前TxtFileReader支持功能如下：
+RedisReader实现了从本地文件读取数据并转为DataX协议的功能，本地文件本身是无结构化数据存储，对于DataX而言，RedisReader实现上类比OSSReader，有诸多相似之处。目前RedisReader支持功能如下：
 
 1. 支持且仅支持读取TXT的文件，且要求TXT中shema为一张二维表。
 
@@ -50,7 +50,7 @@ TxtFileReader实现了从本地文件读取数据并转为DataX协议的功能�
         "content": [
             {
                 "reader": {
-                    "name": "txtfilereader",
+                    "name": "RedisReader",
                     "parameter": {
                         "path": ["/home/haiwei.luo/case00/data"],
                         "encoding": "UTF-8",
@@ -101,11 +101,11 @@ TxtFileReader实现了从本地文件读取数据并转为DataX协议的功能�
 
 	* 描述：本地文件系统的路径信息，注意这里可以支持填写多个路径。 <br />
 
-		 当指定单个本地文件，TxtFileReader暂时只能使用单线程进行数据抽取。二期考虑在非压缩文件情况下针对单个File可以进行多线程并发读取。
+		 当指定单个本地文件，RedisReader暂时只能使用单线程进行数据抽取。二期考虑在非压缩文件情况下针对单个File可以进行多线程并发读取。
 
-		当指定多个本地文件，TxtFileReader支持使用多线程进行数据抽取。线程并发数通过通道数指定。
+		当指定多个本地文件，RedisReader支持使用多线程进行数据抽取。线程并发数通过通道数指定。
 
-		当指定通配符，TxtFileReader尝试遍历出多个文件信息。例如: 指定/*代表读取/目录下所有的文件，指定/bazhen/\*代表读取bazhen目录下游所有的文件。**TxtFileReader目前只支持\*作为文件通配符。**
+		当指定通配符，RedisReader尝试遍历出多个文件信息。例如: 指定/*代表读取/目录下所有的文件，指定/bazhen/\*代表读取bazhen目录下游所有的文件。**RedisReader目前只支持\*作为文件通配符。**
 
 		**特别需要注意的是，DataX会将一个作业下同步的所有Text File视作同一张数据表。用户必须自己保证所有的File能够适配同一套schema信息。读取文件用户必须保证为类CSV格式，并且提供给DataX权限可读。**
 
@@ -134,7 +134,7 @@ TxtFileReader实现了从本地文件读取数据并转为DataX协议的功能�
         },
         {
            "type": "string",
-           "value": "alibaba"  //从TxtFileReader内部生成alibaba的字符串字段作为当前字段
+           "value": "alibaba"  //从RedisReader内部生成alibaba的字符串字段作为当前字段
         }
 		```
 
@@ -189,7 +189,7 @@ TxtFileReader实现了从本地文件读取数据并转为DataX协议的功能�
 
 ### 3.3 类型转换
 
-本地文件本身不提供数据类型，该类型是DataX TxtFileReader定义：
+本地文件本身不提供数据类型，该类型是DataX RedisReader定义：
 
 | DataX 内部类型| 本地文件 数据类型    |
 | -------- | -----  |

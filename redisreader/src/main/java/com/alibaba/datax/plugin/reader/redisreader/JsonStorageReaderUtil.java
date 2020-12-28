@@ -20,6 +20,7 @@ import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import redis.clients.jedis.ScanResult;
 
 public class JsonStorageReaderUtil {
 
@@ -47,6 +48,18 @@ public class JsonStorageReaderUtil {
 		}
 	}
 
+	public static void transportOneRecord(RecordSender recordSender,
+										  TaskPluginCollector taskPluginCollector,
+										  List<ColumnEntry> column,
+										  List<JSONObject> jsonObjectList) {
+		for(Object data : jsonObjectList){
+			JSONObject row = (JSONObject)data;
+			if (!row.isEmpty()) {
+				transportOneRecord(recordSender, column, row, taskPluginCollector);
+			}
+		}
+	}
+
 	public static Record transportOneRecord(RecordSender recordSender, List<ColumnEntry> columnConfigs,
 			JSONObject row, TaskPluginCollector taskPluginCollector) {
 		Record record = recordSender.createRecord();
@@ -69,7 +82,7 @@ public class JsonStorageReaderUtil {
 				case LONG:
 					try {
 						columnGenerated = new LongColumn(columnValue);
-					} catch (Exception e) {
+					} catch (RuntimeException e) {
 						throw new IllegalArgumentException(
 								String.format("类型转换错误, 无法将[%s] 转换为[%s]", columnValue, "LONG"));
 					}
@@ -77,7 +90,7 @@ public class JsonStorageReaderUtil {
 				case DOUBLE:
 					try {
 						columnGenerated = new DoubleColumn(columnValue);
-					} catch (Exception e) {
+					} catch (RuntimeException e) {
 						throw new IllegalArgumentException(
 								String.format("类型转换错误, 无法将[%s] 转换为[%s]", columnValue, "DOUBLE"));
 					}
@@ -85,7 +98,7 @@ public class JsonStorageReaderUtil {
 				case BOOLEAN:
 					try {
 						columnGenerated = new BoolColumn(columnValue);
-					} catch (Exception e) {
+					} catch (RuntimeException e) {
 						throw new IllegalArgumentException(
 								String.format("类型转换错误, 无法将[%s] 转换为[%s]", columnValue, "BOOLEAN"));
 					}
@@ -126,7 +139,7 @@ public class JsonStorageReaderUtil {
 			taskPluginCollector.collectDirtyRecord(record, iae.getMessage());
 		} catch (IndexOutOfBoundsException ioe) {
 			taskPluginCollector.collectDirtyRecord(record, ioe.getMessage());
-		} catch (Exception e) {
+		} catch (RuntimeException e) {
 			if (e instanceof DataXException) {
 				throw (DataXException) e;
 			}

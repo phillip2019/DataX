@@ -2,5 +2,5 @@
     "name": "redisreader",
     "class": "com.alibaba.datax.plugin.reader.redisreader.RedisReader",
     "description": "useScene: test. mechanism: use datax framework to transport data from redis",
-    "developer": "crabo yang"
+    "developer": "xiaowei.song"
 }

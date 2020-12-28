@@ -6,21 +6,21 @@ import com.alibaba.datax.common.plugin.RecordSender;
 import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.common.spi.Reader;
 import com.alibaba.datax.common.util.Configuration;
-
-import com.alibaba.datax.plugin.reader.redisreader.JsonStorageReaderUtil.RedisKeyTypeEnum;
-import com.google.common.collect.Collections2;
-import redis.clients.jedis.*;
-
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.*;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static redis.clients.jedis.ScanParams.SCAN_POINTER_START;
 
 /**
- * Created by crabo yang on 17-8-31.
+ *
+ * @author xiaowei.song
+ * @date 2020-12-28
  */
 public class RedisReader extends Reader {
     public static class Job extends Reader.Job {
@@ -32,11 +32,19 @@ public class RedisReader extends Reader {
         private String auth = null;
         private int port = 6897;
         private int readBatchCount = 5000;
+        private int db = 0;
         private boolean testOnBorrow;
 
         private List<String> listKeys = null;
 
         private int connectionTimeout = -1;
+
+        private int maxIdle = 10;
+        private int maxTotal = 30;
+        private int minIdle = 0;
+        private boolean blockWhenExhausted;
+        private boolean jmxEnabled;
+
         public static JedisPool JEDIS_POOL;
 
         @Override
@@ -46,41 +54,53 @@ public class RedisReader extends Reader {
             host = this.originConfig.getString(Key.HOST);
             auth = this.originConfig.getString(Key.AUTH_PWD);
             port = this.originConfig.getInt(Key.PORT);
+            db = this.originConfig.getInt(Key.DB, 0);
             testOnBorrow = this.originConfig.getBool(Key.TEST_ON_BORROW, false);
 
             listKeys = this.originConfig.getList(Key.ListKey, String.class);
 
             readBatchCount = this.originConfig.getInt(Key.READ_BATCH_SIZE, 5000);
             connectionTimeout = this.originConfig.getInt(Key.CONN_TIMEOUT);
+            maxIdle = this.originConfig.getInt(Key.MAX_IDLE, 10);
+            maxTotal = this.originConfig.getInt(Key.MAX_TOTAL, 30);
+            minIdle = this.originConfig.getInt(Key.MIN_IDLE, 0);
+            blockWhenExhausted = this.originConfig.getBool(Key.BLOCK_WHEN_EXHAUSTED, true);
+            jmxEnabled = this.originConfig.getBool(Key.JMX_ENABLED, true);
         }
 
         @Override
         public void prepare() {
             LOG.debug("prepare() begin...");
-            if (listKeys.isEmpty())
+            if (listKeys.isEmpty()) {
                 throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR
                         , "No target Keys defined in config.");
+            }
             // 生成连接池配置信息
             JedisPoolConfig config = new JedisPoolConfig();
             // 	资源池允许最大空闲的连接数， 默认8
-            config.setMaxIdle(10);
+            config.setMaxIdle(maxIdle);
             // 资源池中最大连接数, 默认8
-            config.setMaxTotal(30);
+            config.setMaxTotal(maxTotal);
             // 资源池确保最少空闲的连接数
-            config.setMinIdle(0);
+            config.setMinIdle(minIdle);
             // 当资源池用尽后，调用者是否要等待。只有当为true时，下面的maxWaitMillis才会生效，默认true
-            config.setBlockWhenExhausted(true);
+            config.setBlockWhenExhausted(jmxEnabled);
             // 最大等待时间，毫秒，默认-1：表示永不超时
             config.setMaxWaitMillis(5 * 1000);
+            // 开启空闲连接检测
+            config.setTestWhileIdle(true);
+            config.setTestOnReturn(true);
+            config.setNumTestsPerEvictionRun(-1);
             //向资源池借用连接时是否做连接有效性检测(ping)，无效连接会被移除
-            if (testOnBorrow)
+            if (testOnBorrow) {
                 config.setTestOnBorrow(true);
+            }
 
             // 是否开启jmx监控，可用于监控
-            config.setJmxEnabled(true);
+            config.setJmxEnabled(jmxEnabled);
 
             // 在应用初始化的时候生成连接池
-            JEDIS_POOL = new JedisPool(config, host, port, connectionTimeout);
+            JEDIS_POOL = new JedisPool(config, host, port, connectionTimeout, auth, db);
             LOG.info("您即将读取的listKeys length为: [{}], \n {}", this.listKeys.size(), this.listKeys);
         }
 
@@ -153,7 +173,7 @@ public class RedisReader extends Reader {
                     if(keys != null && !keys.isEmpty()) {
                         targetList.addAll(keys);
                     }
-                } while (!(cursor = scanResult.getStringCursor()).equals(SCAN_POINTER_START));
+                } while (!(cursor = scanResult.getCursor()).equals(SCAN_POINTER_START));
             }
             return targetList;
         }
@@ -179,8 +199,9 @@ public class RedisReader extends Reader {
             try {
                 redisClient = Job.JEDIS_POOL.getResource();
 
-                if (this.originConfig.getString(Key.AUTH_PWD) != null)
+                if (this.originConfig.getString(Key.AUTH_PWD) != null) {
                     redisClient.auth(this.originConfig.getString(Key.AUTH_PWD));
+                }
 
             } catch (Exception e) {
                 LOG.error("Can't create redis from pool", e);
@@ -226,8 +247,9 @@ public class RedisReader extends Reader {
             try {
                 redisClient = Job.JEDIS_POOL.getResource();
 
-                if (readerSliceConfig.getString(Key.AUTH_PWD) != null)
+                if (readerSliceConfig.getString(Key.AUTH_PWD) != null) {
                     redisClient.auth(readerSliceConfig.getString(Key.AUTH_PWD));
+                }
 
             } catch (Exception e) {
                 LOG.error("Can't create redis from pool", e);
@@ -243,10 +265,12 @@ public class RedisReader extends Reader {
             List<ColumnEntry> columns = JsonStorageReaderUtil.getListColumnEntry(readerSliceConfig, Key.COLUMN);
             TaskPluginCollector collector = super.getTaskPluginCollector();
             Jedis client = getRedisClient();
-            String cursor = SCAN_POINTER_START;
-            ScanParams sp = null;
-            String keyType = null;
+            String cursor;
+            ScanParams sp;
+            String keyType;
             ScanResult sr = null;
+            List ls;
+            List<JSONObject> resultList = null;
             for (String cacheKey : this.sourceKeys) {
                 LOG.debug("reading redis cache key: [{}]", cacheKey);
                 List<String> json = null;
@@ -256,38 +280,66 @@ public class RedisReader extends Reader {
                 sp.match(cacheKey);
 
                 cursor = SCAN_POINTER_START;
-
+                boolean singleValue = false;
+                resultList = new ArrayList<>();
                 try {
                     keyType = client.type(cacheKey);
                     do {
                         switch (keyType) {
                             case "hash":
                                 sr = client.hscan(cacheKey, cursor, sp);
+                                ls = sr.getResult();
+                                for (Object o : ls) {
+                                    Map.Entry<String, String> ot = (Map.Entry<String, String>)o;
+                                    JSONObject jo = new JSONObject();
+                                    jo.put("hKey", ot.getKey());
+                                    jo.put("hValue", ot.getValue());
+                                    jo.put("key", cacheKey);
+                                    resultList.add(jo);
+                                }
                                 break;
+                            case "zset":
+                                sr = client.zscan(cacheKey, cursor, sp);
+                                ls = sr.getResult();
+                                for (Object o : ls) {
+                                    Tuple ot = (Tuple)o;
+                                    JSONObject jo = new JSONObject();
+                                    jo.put("element", ot.getElement());
+                                    jo.put("score", ot.getScore());
+                                    jo.put("key", cacheKey);
+                                    resultList.add(jo);
+                                }
+                                break;
+                            case "string":
+                                String str = client.get(cacheKey);
+                                singleValue = true;
+                                JSONObject jo = new JSONObject();
+                                jo.put("key", cacheKey);
+                                jo.put("value", str);
+                                resultList.add(jo);
+                                break;
+                            case "list":
+                            case "set":
                             default:
                                 sr = client.sscan(cacheKey, cursor, sp);
+                                ls = sr.getResult();
+                                for (Object o : ls) {
+                                    String ot = (String)o;
+                                    JSONObject jor = new JSONObject();
+                                    jor.put("value", ot);
+                                    jor.put("key", cacheKey);
+                                    resultList.add(jor);
+                                }
                                 break;
                         }
-                        //读取头部批量数据
+                        JsonStorageReaderUtil.transportOneRecord(recordSender, collector,
+                                columns, resultList);
 
-                        json = client.lrange(cacheKey, batch_start_pos, batch_start_pos + readBatchSize - 1);
-                        for (String row : json) {
-                            JsonStorageReaderUtil.transportOneRecord(recordSender, collector,
-                                    columns, row);
+                        // 若是单元素类型，则直接结束此key查询
+                        if (singleValue) {
+                            break;
                         }
-                        i++;
-                        if (i > 5) {//每一批次flush成功，则从redis删除本批次
-                            recordSender.flush();
-                            //仅保留从头部起 [batch*i, END] 之间的数据
-                            client.ltrim(cacheKey, batch_start_pos, -1);
-                            i = 0;
-                        }
-                    } while (!(cursor = sr.getStringCursor()).equals(SCAN_POINTER_START));
-
-                    if (i > 0) {
-                        recordSender.flush();
-                        client.ltrim(cacheKey, readBatchSize * i, -1);
-                    }
+                    } while (!(cursor = sr.getCursor()).equals(SCAN_POINTER_START));
                 } catch (Exception e) {
                     String message = String
                             .format("error reading redis : [%s]", cacheKey);
@@ -296,7 +348,23 @@ public class RedisReader extends Reader {
                     throw DataXException.asDataXException(
                             CommonErrorCode.RUNTIME_ERROR, message);
                 } finally {
-                    client.close();
+                    // 若还处于激活状态，则归还连接
+                    if (client != null) {
+                        try {
+                            client.close();
+                        } catch (RuntimeException e) {
+                            LOG.error("释放jedis资源出错，将要关闭jedis，异常信息：", e);
+                            if (client != null) {
+                                try {
+                                    // 2. 客户端主动关闭连接
+                                    client.disconnect();
+                                } catch (Exception e1) {
+                                    LOG.error("disconnect jedis connection fail: " , e);
+                                }
+                            }
+                        }
+
+                    }
                 }
             }
             LOG.debug("end read redis ...");
