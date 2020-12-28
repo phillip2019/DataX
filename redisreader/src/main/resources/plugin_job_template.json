@@ -1,0 +1,12 @@
+{
+    "name": "redisreader",
+    "parameter": {
+        "host": "localhost",
+        "port": 6397,
+        "auth": "password",
+        "connectionTimeout": 60000,
+        "readBatchSize": 5000,
+        "listKey": [],
+        "column": []
+    }
+}
