@@ -20,9 +20,12 @@ import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.ScanResult;
 
 public class JsonStorageReaderUtil {
+	private static final Logger LOG = LoggerFactory.getLogger(JsonStorageReaderUtil.class);
 
 	public static void transportOneRecord(RecordSender recordSender,
 			TaskPluginCollector taskPluginCollector,
@@ -72,6 +75,8 @@ public class JsonStorageReaderUtil {
 				String columnName = columnConfig.getValue();
 
 				String columnValue = row.getString(columnName);
+
+				LOG.debug("columnName: [{}], columnValue: [{}]", columnName, columnValue);
 
 				ColumnType type = ColumnType.valueOf(columnType.toUpperCase());
 
@@ -130,9 +135,7 @@ public class JsonStorageReaderUtil {
 					throw DataXException.asDataXException(CommonErrorCode.CONVERT_NOT_SUPPORT,
 							errorMessage);
 				}
-
 				record.addColumn(columnGenerated);
-
 			}
 			recordSender.sendToWriter(record);
 		} catch (IllegalArgumentException iae) {

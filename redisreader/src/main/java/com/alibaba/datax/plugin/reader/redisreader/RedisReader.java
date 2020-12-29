@@ -203,15 +203,10 @@ public class RedisReader extends Reader {
             return splitedList;
         }
 
-        private synchronized Jedis getRedisClient() {
+        public static synchronized Jedis getRedisClient() {
             Jedis redisClient = null;
             try {
                 redisClient = Job.JEDIS_POOL.getResource();
-
-                if (this.originConfig.getString(Key.AUTH_PWD) != null) {
-                    redisClient.auth(this.originConfig.getString(Key.AUTH_PWD));
-                }
-
             } catch (Exception e) {
                 LOG.error("Can't create redis from pool", e);
                 throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR
@@ -251,34 +246,21 @@ public class RedisReader extends Reader {
         public void destroy() {
         }
 
-        private synchronized Jedis getRedisClient() {
-            Jedis redisClient = null;
-            try {
-                redisClient = Job.JEDIS_POOL.getResource();
-
-                if (readerSliceConfig.getString(Key.AUTH_PWD) != null) {
-                    redisClient.auth(readerSliceConfig.getString(Key.AUTH_PWD));
-                }
-
-            } catch (Exception e) {
-                LOG.error("Can't create redis from pool", e);
-                throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR
-                        , "Can't create redis from pool");
-            }
-            return redisClient;
-        }
-
         @Override
         public void startRead(RecordSender recordSender) {
             LOG.debug("start read redis topic...");
-            List<ColumnEntry> columns = JsonStorageReaderUtil.getListColumnEntry(readerSliceConfig, Key.COLUMN);
+            Jedis client = Job.getRedisClient();
+
+            List<ColumnEntry> columnMetas = JsonStorageReaderUtil.getListColumnEntry(readerSliceConfig, Key.COLUMN);
+            LOG.debug("task columns: {}", columnMetas);
             TaskPluginCollector collector = super.getTaskPluginCollector();
-            Jedis client = getRedisClient();
+
             String cursor;
             ScanParams sp;
-            String keyType;
+            String keyType = null;
             ScanResult sr = null;
             List ls;
+            boolean raiseException = false;
             List<JSONObject> resultList = null;
             for (String cacheKey : this.sourceKeys) {
                 LOG.debug("reading redis cache key: [{}]", cacheKey);
@@ -286,10 +268,10 @@ public class RedisReader extends Reader {
 
                 sp = new ScanParams();
                 sp.count(readBatchSize);
-                sp.match(cacheKey);
 
                 cursor = SCAN_POINTER_START;
                 boolean singleValue = false;
+                boolean nonExistKey = false;
                 resultList = new ArrayList<>();
                 try {
                     keyType = client.type(cacheKey);
@@ -327,6 +309,10 @@ public class RedisReader extends Reader {
                                 jo.put("value", str);
                                 resultList.add(jo);
                                 break;
+                            case "none":
+                                // key不存在，直接结束遍历
+                                nonExistKey = true;
+                                break;
                             case "list":
                             case "set":
                             default:
@@ -341,40 +327,48 @@ public class RedisReader extends Reader {
                                 }
                                 break;
                         }
+                        LOG.debug("task key: [{}], task key type: [{}], result list: [{}]", cacheKey, keyType, resultList);
                         JsonStorageReaderUtil.transportOneRecord(recordSender, collector,
-                                columns, resultList);
+                                columnMetas, resultList);
 
                         // 若是单元素类型，则直接结束此key查询
-                        if (singleValue) {
+                        if (singleValue || nonExistKey) {
                             break;
                         }
                     } while (!(cursor = sr.getCursor()).equals(SCAN_POINTER_START));
                 } catch (Exception e) {
+                    raiseException = true;
                     String message = String
-                            .format("error reading redis : [%s]", cacheKey);
+                            .format("error reading redis key: [%s], type: [%s]", cacheKey, keyType);
                     LOG.error(message, e);
-
                     throw DataXException.asDataXException(
                             CommonErrorCode.RUNTIME_ERROR, message);
                 } finally {
-                    // 若还处于激活状态，则归还连接
-                    if (client != null) {
-                        try {
+                    if (raiseException) {
+                        LOG.error("raise exception, close connection!!!");
+                        if (client != null) {
                             client.close();
-                        } catch (RuntimeException e) {
-                            LOG.error("释放jedis资源出错，将要关闭jedis，异常信息：", e);
-                            if (client != null) {
-                                try {
-                                    // 2. 客户端主动关闭连接
-                                    client.disconnect();
-                                } catch (Exception e1) {
-                                    LOG.error("disconnect jedis connection fail: " , e);
-                                }
-                            }
                         }
-
                     }
                 }
+            }
+
+            // 若还处于激活状态，则归还连接
+            if (client != null) {
+                try {
+                    client.close();
+                } catch (RuntimeException e) {
+                    LOG.error("释放jedis资源出错，将要关闭jedis，异常信息：", e);
+                    if (client != null) {
+                        try {
+                            // 2. 客户端主动关闭连接
+                            client.disconnect();
+                        } catch (Exception e1) {
+                            LOG.error("disconnect jedis connection fail: " , e);
+                        }
+                    }
+                }
+
             }
             LOG.debug("end read redis ...");
         }
