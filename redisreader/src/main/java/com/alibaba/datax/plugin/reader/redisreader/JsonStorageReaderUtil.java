@@ -93,6 +93,7 @@ public class JsonStorageReaderUtil {
 					}
 					break;
 				case DOUBLE:
+					// 若值是Double对象类型，且字符串中包含
 					try {
 						columnGenerated = new DoubleColumn(columnValue);
 					} catch (RuntimeException e) {

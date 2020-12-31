@@ -7,10 +7,16 @@ import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.common.spi.Reader;
 import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -120,11 +126,9 @@ public class RedisReader extends Reader {
         // warn: 如果源目录为空会报错，拖空目录意图=>空文件显示指定此意图
         @Override
         public List<Configuration> split(int adviceNumber) {
-            LOG.debug("split() begin...");
+            LOG.info("split() begin, adviceNumber: [{}] ...", adviceNumber);
             List<Configuration> readerSplitConfigs = new ArrayList<Configuration>();
 
-            // warn:每个slice拖且仅拖一个文件,
-            // int splitNumber = adviceNumber;
             int splitNumber = this.listKeys.size();
             if (0 == splitNumber) {
                 throw DataXException.asDataXException(
@@ -136,9 +140,11 @@ public class RedisReader extends Reader {
             // scan match pattern
             List<String> targetListKeys = sourceTopic2TargetTopic(this.listKeys);
             LOG.info("source list keys size: {}, target keys size: {}", this.listKeys.size(), targetListKeys.size());
+            // 更新需要切分数据尺寸
+            splitNumber = targetListKeys.size();
 
             List<List<String>> splitedSourceFiles = this.splitSourceFiles(
-                    targetListKeys, splitNumber);
+                    targetListKeys, adviceNumber);
 
             for (List<String> topics : splitedSourceFiles) {
                 Configuration splitedConfig = this.originConfig.clone();
@@ -203,7 +209,7 @@ public class RedisReader extends Reader {
             return splitedList;
         }
 
-        public static synchronized Jedis getRedisClient() {
+        public synchronized Jedis getRedisClient() {
             Jedis redisClient = null;
             try {
                 redisClient = Job.JEDIS_POOL.getResource();
@@ -246,11 +252,23 @@ public class RedisReader extends Reader {
         public void destroy() {
         }
 
+        public synchronized Jedis getRedisClient() {
+            Jedis redisClient = null;
+            try {
+                redisClient = Job.JEDIS_POOL.getResource();
+            } catch (Exception e) {
+                LOG.error("Can't create redis from pool", e);
+                throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR
+                        , "Can't create redis from pool");
+            }
+            return redisClient;
+        }
+
         @Override
         public void startRead(RecordSender recordSender) {
             LOG.debug("start read redis topic...");
-            Jedis client = Job.getRedisClient();
 
+            Jedis client = getRedisClient();
             List<ColumnEntry> columnMetas = JsonStorageReaderUtil.getListColumnEntry(readerSliceConfig, Key.COLUMN);
             LOG.debug("task columns: {}", columnMetas);
             TaskPluginCollector collector = super.getTaskPluginCollector();
@@ -302,11 +320,22 @@ public class RedisReader extends Reader {
                                 }
                                 break;
                             case "string":
-                                String str = client.get(cacheKey);
-                                singleValue = true;
+                                String valStr = client.get(cacheKey);
                                 JSONObject jo = new JSONObject();
                                 jo.put("key", cacheKey);
-                                jo.put("value", str);
+                                // 针对性处理反序列化问题
+                                if (StringUtils.contains(valStr, "java.lang.Double")) {
+                                    byte[] valBytes = client.get(cacheKey.getBytes());
+                                    ByteArrayInputStream bais = new ByteArrayInputStream(valBytes);;
+                                    ObjectInputStream ois = new ObjectInputStream(bais);
+                                    Double valStr2 = (Double) ois.readObject();
+                                    // double 保留8位精度, 避免精度不一致，数据校验出错
+                                    jo.put("value", String.format("%.8f", valStr2));
+                                } else {
+                                    jo.put("value", valStr);
+                                }
+                                singleValue = true;
+
                                 resultList.add(jo);
                                 break;
                             case "none":
@@ -372,6 +401,5 @@ public class RedisReader extends Reader {
             }
             LOG.debug("end read redis ...");
         }
-
     }
 }
