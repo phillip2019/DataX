@@ -326,9 +326,13 @@ public class RedisReader extends Reader {
                                 // 针对性处理反序列化问题
                                 if (StringUtils.contains(valStr, "java.lang.Double")) {
                                     byte[] valBytes = client.get(cacheKey.getBytes());
-                                    ByteArrayInputStream bais = new ByteArrayInputStream(valBytes);;
-                                    ObjectInputStream ois = new ObjectInputStream(bais);
-                                    Double valStr2 = (Double) ois.readObject();
+                                    Double valStr2 = 0.0D;
+                                    // 处理NPE
+                                    if (valBytes != null) {
+                                        ByteArrayInputStream bais = new ByteArrayInputStream(valBytes);;
+                                        ObjectInputStream ois = new ObjectInputStream(bais);
+                                        valStr2 = (Double) ois.readObject();
+                                    }
                                     // double 保留8位精度, 避免精度不一致，数据校验出错
                                     jo.put("value", String.format("%.8f", valStr2));
                                 } else {
