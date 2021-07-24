@@ -8,7 +8,10 @@ import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.datax.plugin.writer.rediswriter.Constant;
 import com.alibaba.datax.plugin.writer.rediswriter.Key;
 import com.alibaba.datax.plugin.writer.rediswriter.RedisWriteAbstract;
+import com.alibaba.datax.plugin.writer.rediswriter.RedisWriterHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author lijf@2345.com
@@ -16,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
  * @desc list类型写redis
  */
 public class ListTypeWriter extends RedisWriteAbstract {
+    private static final Logger LOG = LoggerFactory.getLogger(ListTypeWriter.class);
+
     String pushType;
     String valueDelimiter;
 
@@ -64,6 +69,9 @@ public class ListTypeWriter extends RedisWriteAbstract {
                 case Constant.LIST_PUSH_TYPE_LPUSH:
                     pipelined.lpush(redisKey, redisValue);
                     break;
+                default:
+                    LOG.info("Add to pipline pushType not found");
+                    continue;
             }
             pipelined.expire(redisKey, expire);
             records++;

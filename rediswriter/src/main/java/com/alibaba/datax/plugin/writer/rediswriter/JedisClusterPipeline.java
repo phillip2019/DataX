@@ -3,8 +3,8 @@ package com.alibaba.datax.plugin.writer.rediswriter;
 
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisRedirectionException;
-import redis.clients.util.JedisClusterCRC16;
-import redis.clients.util.SafeEncoder;
+import redis.clients.jedis.util.JedisClusterCRC16;
+import redis.clients.jedis.util.SafeEncoder;
 
 import java.io.Closeable;
 import java.lang.reflect.Field;
@@ -124,7 +124,7 @@ public class JedisClusterPipeline extends PipelineBase implements Closeable {
 	
 	private void flushCachedData(Jedis jedis) {
 		try {
-			jedis.getClient().getAll();
+			jedis.getClient().flushAll();
 		} catch (RuntimeException ex) {
 			// 其中一个client出问题，后面出问题的几率较大
 		}
@@ -139,7 +139,7 @@ public class JedisClusterPipeline extends PipelineBase implements Closeable {
 
 	@Override
 	protected Client getClient(byte[] key) {
-		Jedis jedis = getJedis(JedisClusterCRC16.getSlot(key));
+		Jedis jedis = getJedis(JedisClusterCRC16.getCRC16(key));
 		
 		Client client = jedis.getClient();
 		clients.add(client);
