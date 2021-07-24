@@ -174,7 +174,7 @@ rediswriter支持导入redis的数据类型有：
 
 	* 必选：否 <br />
 
-	* 默认值：100 <br />
+	* 默认值：1000 <br />
 
 * **keyPrefix**
 
