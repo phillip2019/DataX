@@ -1,0 +1,6 @@
+{
+    "name": "rediswriter",
+    "class": "com.alibaba.datax.plugin.writer.rediswriter.RedisWriter",
+    "description": "useScene: prod. mechanism: 将结构化数据写入redis.",
+    "developer": "songxiaowei@chinagoods.com"
+}
