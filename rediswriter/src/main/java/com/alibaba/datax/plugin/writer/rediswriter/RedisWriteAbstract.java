@@ -37,10 +37,11 @@ public abstract class RedisWriteAbstract {
         String mode = configuration.getNecessaryValue(Key.REDISMODE, CommonErrorCode.CONFIG_ERROR);
         String addr = configuration.getNecessaryValue(Key.ADDRESS, CommonErrorCode.CONFIG_ERROR);
         String auth = configuration.getString(Key.AUTH);
+        Integer db = configuration.getInt(Key.DB, 0);
         if (Constant.CLUSTER.equalsIgnoreCase(mode)) {
             redisClient = RedisWriterHelper.getJedisCluster(addr, auth);
         } else {
-            redisClient = RedisWriterHelper.getJedis(addr, auth);
+            redisClient = RedisWriterHelper.getJedis(addr, auth, db);
         }
         return RedisWriterHelper.getPipeLine(redisClient);
     }

@@ -120,6 +120,14 @@ rediswriter支持导入redis的数据类型有：
 
 	* 默认值：无 <br />
 
+* **db**
+
+	* 描述：redis database, 写入redis的对应数据库， 请注意，此参数只在单机模式生效，集群默认只能写入db 0	  <br />
+
+	* 必选：否 <br />
+
+	* 默认值：0 <br />
+
 * **writeType**
 
 	* 描述：写入redis的数据类型：string、list、hash	  <br />

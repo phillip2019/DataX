@@ -22,6 +22,7 @@ public class RedisWriterHelper {
         String mode = originalConfig.getNecessaryValue(Key.REDISMODE, CommonErrorCode.CONFIG_ERROR);
         String addr = originalConfig.getNecessaryValue(Key.ADDRESS, CommonErrorCode.CONFIG_ERROR);
         String auth = originalConfig.getString(Key.AUTH);
+        Integer db = originalConfig.getInt(Key.DB, 0);
 
         if(Constant.CLUSTER.equalsIgnoreCase(mode)){
             JedisCluster jedisCluster = getJedisCluster(addr, auth);
@@ -30,7 +31,7 @@ public class RedisWriterHelper {
             jedisCluster.close();
 
         }else if(Constant.STANDALONE.equalsIgnoreCase(mode)){
-            Jedis jedis = getJedis(addr, auth);
+            Jedis jedis = getJedis(addr, auth, db);
             jedis.set("testConnet","test");
             jedis.expire("testConnet",1);
             jedis.close();
@@ -48,12 +49,13 @@ public class RedisWriterHelper {
      * @param auth 密码
      * @return Jedis
      */
-    public static Jedis getJedis(String addr, String auth) {
+    public static Jedis getJedis(String addr, String auth, int db) {
         String[] split = addr.split(":");
         Jedis jedis = new Jedis(split[0], Integer.parseInt(split[1]));
         if(StringUtils.isNoneBlank(auth)){
             jedis.auth(auth);
         }
+        jedis.select(db);
         return jedis;
     }
 
