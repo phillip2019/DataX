@@ -48,7 +48,12 @@ public class HashTypeWriter extends RedisWriteAbstract {
                 pipelined.hset(redisKey, filed, value);
                 records++;
             }
-            pipelined.expire(redisKey, expire);
+            // 若expire为-1，则设置此redisKey永不过期
+            if (expire == -1) {
+                pipelined.persist(redisKey);
+            } else {
+                pipelined.expire(redisKey, expire);
+            }
         }
     }
 

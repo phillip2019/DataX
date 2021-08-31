@@ -9,6 +9,8 @@ import com.alibaba.datax.plugin.writer.rediswriter.writer.DeleteWriter;
 import com.alibaba.datax.plugin.writer.rediswriter.writer.HashTypeWriter;
 import com.alibaba.datax.plugin.writer.rediswriter.writer.ListTypeWriter;
 import com.alibaba.datax.plugin.writer.rediswriter.writer.StringTypeWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +18,16 @@ import java.util.List;
 public class RedisWriter extends Writer {
     public static class Job extends Writer.Job {
         private Configuration originalConfig = null;
+        private static final Logger LOG = LoggerFactory.getLogger(RedisWriter.class);
 
         @Override
         public List<Configuration> split(int mandatoryNumber) {
             List<Configuration> splitResultConfigs = new ArrayList<Configuration>();
             for (int j = 0; j < mandatoryNumber; j++) {
                 splitResultConfigs.add(originalConfig.clone());
+                LOG.info("splited write part: {}", j);
             }
+            LOG.info("end do split.");
             return splitResultConfigs;
         }
 
@@ -39,6 +44,7 @@ public class RedisWriter extends Writer {
     }
 
     public static class Task extends Writer.Task {
+        private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private Configuration taskConfig;
         RedisWriteAbstract wirter;
 
@@ -53,6 +59,7 @@ public class RedisWriter extends Writer {
             this.taskConfig = super.getPluginJobConf();
             String writeType = taskConfig.getString(Key.WRITE_TYPE);
             String writeMode = taskConfig.getString(Key.WRITE_MODE);
+            LOG.info("当前写入模式为： {}", Key.WRITE_MODE);
             // 判断是delete还是insert
             if (Constant.WRITE_MODE_DELETE.equalsIgnoreCase(writeMode)) {
                 wirter = new DeleteWriter(taskConfig);

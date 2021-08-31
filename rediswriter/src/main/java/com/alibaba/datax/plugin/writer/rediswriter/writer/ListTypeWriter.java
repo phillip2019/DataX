@@ -73,7 +73,12 @@ public class ListTypeWriter extends RedisWriteAbstract {
                     LOG.info("Add to pipline pushType not found");
                     continue;
             }
-            pipelined.expire(redisKey, expire);
+            // 若expire为-1，则设置此redisKey永不过期
+            if (expire == -1) {
+                pipelined.persist(redisKey);
+            } else {
+                pipelined.expire(redisKey, expire);
+            }
             records++;
         }
     }

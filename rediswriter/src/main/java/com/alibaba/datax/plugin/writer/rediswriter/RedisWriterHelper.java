@@ -24,6 +24,7 @@ public class RedisWriterHelper {
         String auth = originalConfig.getString(Key.AUTH);
         Integer db = originalConfig.getInt(Key.DB, 0);
 
+
         if(Constant.CLUSTER.equalsIgnoreCase(mode)){
             JedisCluster jedisCluster = getJedisCluster(addr, auth);
             jedisCluster.set("testConnet","test");
@@ -32,6 +33,7 @@ public class RedisWriterHelper {
 
         }else if(Constant.STANDALONE.equalsIgnoreCase(mode)){
             Jedis jedis = getJedis(addr, auth, db);
+            jedis.select(db);
             jedis.set("testConnet","test");
             jedis.expire("testConnet",1);
             jedis.close();
@@ -40,6 +42,13 @@ public class RedisWriterHelper {
             throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR,
                     String.format("您提供配置文件有误，[%s] redis的redismode必须是standalone或cluster .", mode));
 
+        }
+
+        if ((Constant.STANDALONE.equalsIgnoreCase(mode) && 0 > db) ||
+            (Constant.STANDALONE.equalsIgnoreCase(mode) && db >= 16) ||
+            (Constant.CLUSTER.equalsIgnoreCase(mode) && db != 0)) {
+            throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR,
+                    String.format("您提供配置文件有误，standalone模式下，可选db为0-15或cluster模式下，可选db为0.", mode));
         }
     }
 
