@@ -131,10 +131,15 @@ public class RedisWriterHelper {
      * @param obj
      */
     public static void close(Object obj) {
+        if (obj == null) {
+            return;
+        }
         if (obj instanceof Jedis) {
-            ((Jedis) obj).close();
+            Jedis jedis = ((Jedis) obj);
+            jedis.close();
         } else if (obj instanceof JedisCluster) {
-            ((JedisCluster) obj).close();
+            JedisCluster jedisCluster = ((JedisCluster) obj);
+            jedisCluster.close();
         }
     }
 }
