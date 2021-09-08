@@ -18,12 +18,12 @@ public abstract class RedisWriteAbstract {
     protected PipelineBase pipelined;
     Object redisClient;
     protected int records;
-    protected String keyPreffix;
+    protected String keyPrefix;
     protected String keySuffix;
-    protected String valuePreffix;
+    protected String valuePrefix;
     protected String valueSuffix;
     protected Integer batchSize;
-    protected Integer expire;
+    protected Long expire;
     protected String strKey;
     protected Integer keyIndex;
     protected Integer valueIndex;
@@ -52,11 +52,11 @@ public abstract class RedisWriteAbstract {
     public void initCommonParams() {
         Configuration detailConfig = this.configuration.getConfiguration(Key.CONFIG);
         batchSize = detailConfig.getInt(Key.BATCH_SIZE, 1000);
-        keyPreffix = detailConfig.getString(Key.KEY_PREFIX, "");
+        keyPrefix = detailConfig.getString(Key.KEY_PREFIX, "");
         keySuffix = detailConfig.getString(Key.KEY_SUFFIX, "");
-        valuePreffix = detailConfig.getString(Key.VALUE_PREFIX, "");
+        valuePrefix = detailConfig.getString(Key.VALUE_PREFIX, "");
         valueSuffix = detailConfig.getString(Key.VALUE_SUFFIX, "");
-        expire = detailConfig.getInt(Key.EXPIRE, Integer.MAX_VALUE);
+        expire = detailConfig.getLong(Key.EXPIRE, Integer.MAX_VALUE);
         pipelined = getRedisPipelineBase(configuration);
     }
 
@@ -105,21 +105,21 @@ public abstract class RedisWriteAbstract {
      */
     public void syscData() {
         if (records >= 0) {
-            RedisWriterHelper.syscData(pipelined);
+            RedisWriterHelper.syncData(pipelined);
             records = 0;
         }
     }
 
 
     public void syscAllData() {
-        RedisWriterHelper.syscData(pipelined);
+        RedisWriterHelper.syncData(pipelined);
     }
 
     /**
      * 关闭资源
      */
     public void close() {
-        RedisWriterHelper.syscData(pipelined);
+        RedisWriterHelper.syncData(pipelined);
         RedisWriterHelper.close(redisClient);
     }
 }

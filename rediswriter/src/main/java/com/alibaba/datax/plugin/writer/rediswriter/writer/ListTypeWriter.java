@@ -8,7 +8,6 @@ import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.datax.plugin.writer.rediswriter.Constant;
 import com.alibaba.datax.plugin.writer.rediswriter.Key;
 import com.alibaba.datax.plugin.writer.rediswriter.RedisWriteAbstract;
-import com.alibaba.datax.plugin.writer.rediswriter.RedisWriterHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +51,9 @@ public class ListTypeWriter extends RedisWriteAbstract {
             String columnValue;
             if (null != keyIndex) {
                 String key = record.getColumn(keyIndex).asString();
-                redisKey = keyPreffix + key + keySuffix;
+                redisKey = keyPrefix + key + keySuffix;
             } else {
-                redisKey = keyPreffix + strKey + keySuffix;
+                redisKey = keyPrefix + strKey + keySuffix;
             }
             columnValue = record.getColumn(valueIndex).asString();
             String[] redisValue = columnValue.split(valueDelimiter);

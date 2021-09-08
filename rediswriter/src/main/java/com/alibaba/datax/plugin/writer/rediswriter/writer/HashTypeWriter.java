@@ -35,16 +35,16 @@ public class HashTypeWriter extends RedisWriteAbstract {
             String redisKey;
             if (null != keyIndex) {
                 String key = record.getColumn(keyIndex).asString();
-                redisKey = keyPreffix + key + keySuffix;
+                redisKey = keyPrefix + key + keySuffix;
             } else {
-                redisKey = keyPreffix + strKey + keySuffix;
+                redisKey = keyPrefix + strKey + keySuffix;
             }
             // hash类型已数据源column名作为filed
             for (Configuration hashFieldIndex : hashFieldIndexs) {
                 String filed = hashFieldIndex.getString(Key.COL_NAME);
                 Integer index = hashFieldIndex.getInt(Key.COL_INDEX);
                 String value = record.getColumn(index).asString();
-                value = valuePreffix + value + valueSuffix;
+                value = valuePrefix + value + valueSuffix;
                 pipelined.hset(redisKey, filed, value);
                 records++;
             }

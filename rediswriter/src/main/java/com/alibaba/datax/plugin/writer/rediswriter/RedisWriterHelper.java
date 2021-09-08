@@ -28,14 +28,14 @@ public class RedisWriterHelper {
         if(Constant.CLUSTER.equalsIgnoreCase(mode)){
             JedisCluster jedisCluster = getJedisCluster(addr, auth);
             jedisCluster.set("testConnet","test");
-            jedisCluster.expire("testConnet",1);
+            jedisCluster.expire("testConnet",1L);
             jedisCluster.close();
 
         }else if(Constant.STANDALONE.equalsIgnoreCase(mode)){
             Jedis jedis = getJedis(addr, auth, db);
             jedis.select(db);
             jedis.set("testConnet","test");
-            jedis.expire("testConnet",1);
+            jedis.expire("testConnet",1L);
             jedis.close();
         }else {
             LOG.error(String.format("您提供配置文件有误，[%s] redis的redismode必须是standalone或cluster .", mode));
@@ -80,10 +80,9 @@ public class RedisWriterHelper {
         JedisCluster jedisCluster;
         Set<HostAndPort> nodes = new HashSet<>();
         String[] split = addr.split(",");
-        for (int i = 0; i < split.length; i++) {
-            String node = split[i];
+        for (String node : split) {
             String[] hostPort = node.split(":");
-            nodes.add(new HostAndPort(hostPort[0],Integer.parseInt(hostPort[1])));
+            nodes.add(new HostAndPort(hostPort[0], Integer.parseInt(hostPort[1])));
         }
         if(StringUtils.isBlank(auth)) {
             jedisCluster = new JedisCluster(nodes,10000, 10000, 3, jedisPoolConfig);
@@ -116,7 +115,7 @@ public class RedisWriterHelper {
      *
      * @param obj
      */
-    public static void syscData(Object obj) {
+    public static void syncData(Object obj) {
         if (obj instanceof Pipeline) {
             Pipeline pipeline = ((Pipeline) obj);
             pipeline.sync();

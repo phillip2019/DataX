@@ -44,7 +44,7 @@ public class DeleteWriter extends RedisWriteAbstract {
         Record record;
         while ((record = lineReceiver.getFromReader()) != null) {
             String key = record.getColumn(keyIndex).asString();
-            String redisKey = keyPreffix + key + keySuffix;
+            String redisKey = keyPrefix + key + keySuffix;
             if (null != hashFileds) {
                 String[] fileds = hashFileds.split(",");
                 pipelined.hdel(redisKey, fileds);

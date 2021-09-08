@@ -43,12 +43,12 @@ public class StringTypeWriter extends RedisWriteAbstract {
             redisValue = valueColumn.asString();
             if (null != keyIndex) {
                 String key = record.getColumn(keyIndex).asString();
-                redisKey = keyPreffix + key + keySuffix;
+                redisKey = keyPrefix + key + keySuffix;
 
             } else {
-                redisKey = keyPreffix + strKey + keySuffix;
+                redisKey = keyPrefix + strKey + keySuffix;
             }
-            redisValue = valuePreffix + redisValue + valueSuffix;
+            redisValue = valuePrefix + redisValue + valueSuffix;
             LOG.info("开始写入redisKey={}, redisValue: {}...", redisKey, redisValue);
             pipelined.set(redisKey, redisValue);
             LOG.info("写入redisKey={}, redisValue: {}完成", redisKey, redisValue);
