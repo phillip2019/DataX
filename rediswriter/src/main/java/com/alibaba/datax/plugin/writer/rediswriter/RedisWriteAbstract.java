@@ -104,7 +104,7 @@ public abstract class RedisWriteAbstract {
      * 正式写入数据到redis
      */
     public void syscData() {
-        if (records >= batchSize) {
+        if (records >= 0) {
             RedisWriterHelper.syscData(pipelined);
             records = 0;
         }

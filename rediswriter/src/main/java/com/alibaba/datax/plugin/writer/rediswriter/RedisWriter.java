@@ -46,12 +46,12 @@ public class RedisWriter extends Writer {
     public static class Task extends Writer.Task {
         private static final Logger LOG = LoggerFactory.getLogger(Task.class);
         private Configuration taskConfig;
-        RedisWriteAbstract wirter;
+        RedisWriteAbstract writer;
 
         @Override
         public void startWrite(RecordReceiver lineReceiver) {
-            wirter.addToPipLine(lineReceiver);
-            wirter.syscData();
+            writer.addToPipLine(lineReceiver);
+            writer.syscData();
         }
 
         @Override
@@ -62,32 +62,32 @@ public class RedisWriter extends Writer {
             LOG.info("当前写入模式为： {}", Key.WRITE_MODE);
             // 判断是delete还是insert
             if (Constant.WRITE_MODE_DELETE.equalsIgnoreCase(writeMode)) {
-                wirter = new DeleteWriter(taskConfig);
+                writer = new DeleteWriter(taskConfig);
             } else {
                 // 判断写redis的数据类型，string，list，hash
                 switch (writeType) {
                     case Constant.WRITE_TYPE_HASH:
-                        wirter = new HashTypeWriter(taskConfig);
+                        writer = new HashTypeWriter(taskConfig);
                         break;
                     case Constant.WRITE_TYPE_LIST:
-                        wirter = new ListTypeWriter(taskConfig);
+                        writer = new ListTypeWriter(taskConfig);
                         break;
                     case Constant.WRITE_TYPE_STRING:
-                        wirter = new StringTypeWriter(taskConfig);
+                        writer = new StringTypeWriter(taskConfig);
                         break;
                     default:
                         throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "rediswriter 不支持此数据类型:" + writeType);
                 }
 
             }
-            wirter.checkAndGetParams();
-            wirter.initCommonParams();
+            writer.checkAndGetParams();
+            writer.initCommonParams();
         }
 
         @Override
         public void destroy() {
-            wirter.syscAllData();
-            wirter.close();
+            writer.syscAllData();
+            writer.close();
         }
     }
 }
