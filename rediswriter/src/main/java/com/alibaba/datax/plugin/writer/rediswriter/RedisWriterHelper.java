@@ -81,12 +81,14 @@ public class RedisWriterHelper {
         Set<HostAndPort> nodes = new HashSet<>();
         String[] split = addr.split(",");
         for (String node : split) {
-            String[] hostPort = node.split(":");
-            nodes.add(new HostAndPort(hostPort[0], Integer.parseInt(hostPort[1])));
+            if (StringUtils.isNotBlank(node)) {
+                String[] hostPort = node.split(":");
+                nodes.add(new HostAndPort(hostPort[0], Integer.parseInt(hostPort[1])));
+            }
         }
         if(StringUtils.isBlank(auth)) {
             jedisCluster = new JedisCluster(nodes,10000, 10000, 3, jedisPoolConfig);
-        }else {
+        } else {
             jedisCluster =  new JedisCluster(nodes, 10000, 10000, 3, auth, jedisPoolConfig);
         }
 

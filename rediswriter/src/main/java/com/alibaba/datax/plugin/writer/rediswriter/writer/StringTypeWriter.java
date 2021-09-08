@@ -49,9 +49,9 @@ public class StringTypeWriter extends RedisWriteAbstract {
                 redisKey = keyPrefix + strKey + keySuffix;
             }
             redisValue = valuePrefix + redisValue + valueSuffix;
-            LOG.info("开始写入redisKey={}, redisValue: {}...", redisKey, redisValue);
+            LOG.debug("开始写入redisKey={}, redisValue: {}...", redisKey, redisValue);
             pipelined.set(redisKey, redisValue);
-            LOG.info("写入redisKey={}, redisValue: {}完成", redisKey, redisValue);
+            LOG.debug("写入redisKey={}, redisValue: {}完成", redisKey, redisValue);
             // 若expire为-1，则设置此redisKey永不过期
             if (expire == -1) {
                 pipelined.persist(redisKey);

@@ -51,7 +51,7 @@ public class RedisWriter extends Writer {
         @Override
         public void startWrite(RecordReceiver lineReceiver) {
             writer.addToPipLine(lineReceiver);
-            writer.syscData();
+            writer.syncData();
         }
 
         @Override
@@ -76,7 +76,7 @@ public class RedisWriter extends Writer {
                         writer = new StringTypeWriter(taskConfig);
                         break;
                     default:
-                        throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "rediswriter 不支持此数据类型:" + writeType);
+                        throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "redisWriter 不支持此数据类型:" + writeType);
                 }
 
             }
@@ -86,7 +86,7 @@ public class RedisWriter extends Writer {
 
         @Override
         public void destroy() {
-            writer.syscAllData();
+            writer.syncAllData();
             writer.close();
         }
     }
