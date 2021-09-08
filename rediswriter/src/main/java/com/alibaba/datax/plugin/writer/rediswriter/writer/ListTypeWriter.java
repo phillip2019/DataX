@@ -73,9 +73,7 @@ public class ListTypeWriter extends RedisWriteAbstract {
                     continue;
             }
             // 若expire为-1，则设置此redisKey永不过期
-            if (expire == -1) {
-                pipelined.persist(redisKey);
-            } else {
+            if (expire != -1) {
                 pipelined.expire(redisKey, expire);
             }
             records++;
