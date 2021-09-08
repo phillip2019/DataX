@@ -60,7 +60,8 @@ public class RedisWriterHelper {
      */
     public static Jedis getJedis(String addr, String auth, int db) {
         String[] split = addr.split(":");
-        Jedis jedis = new Jedis(split[0], Integer.parseInt(split[1]));
+        // 设置redis连接超时时间设置为600s，10分钟
+        Jedis jedis = new Jedis(split[0], Integer.parseInt(split[1]), 600000, 600000);
         if(StringUtils.isNoneBlank(auth)){
             jedis.auth(auth);
         }
@@ -117,8 +118,8 @@ public class RedisWriterHelper {
      */
     public static void syscData(Object obj) {
         if (obj instanceof Pipeline) {
-            ((Pipeline) obj).sync();
-
+            Pipeline pipeline = ((Pipeline) obj);
+            pipeline.sync();
         } else if (obj instanceof JedisClusterPipeline) {
             ((JedisClusterPipeline) obj).sync();
         }
