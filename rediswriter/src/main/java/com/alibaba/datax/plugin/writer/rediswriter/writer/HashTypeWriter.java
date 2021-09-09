@@ -52,6 +52,11 @@ public class HashTypeWriter extends RedisWriteAbstract {
             if (expire != -1) {
                 pipelined.expire(redisKey, expire);
             }
+
+            // 若records超过batchSize，则开始同步写入
+            if (records >= batchSize) {
+                syncData();
+            }
         }
     }
 

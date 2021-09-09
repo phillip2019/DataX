@@ -121,7 +121,6 @@ public class RedisWriterHelper {
         if (obj instanceof Pipeline) {
             Pipeline pipeline = ((Pipeline) obj);
             pipeline.sync();
-            pipeline.clear();
         } else if (obj instanceof JedisClusterPipeline) {
             JedisClusterPipeline pipeline = ((JedisClusterPipeline) obj);
             pipeline.sync();

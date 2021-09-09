@@ -77,6 +77,11 @@ public class ListTypeWriter extends RedisWriteAbstract {
                 pipelined.expire(redisKey, expire);
             }
             records++;
+
+            // 若records超过batchSize，则开始同步写入
+            if (records >= batchSize) {
+                syncData();
+            }
         }
     }
 }

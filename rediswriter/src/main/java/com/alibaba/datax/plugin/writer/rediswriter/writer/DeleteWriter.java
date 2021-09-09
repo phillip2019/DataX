@@ -52,6 +52,11 @@ public class DeleteWriter extends RedisWriteAbstract {
                 pipelined.del(redisKey);
             }
             records++;
+
+            // 若records超过batchSize，则开始同步写入
+            if (records >= batchSize) {
+                syncData();
+            }
         }
     }
 }
