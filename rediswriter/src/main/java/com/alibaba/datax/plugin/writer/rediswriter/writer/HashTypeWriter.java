@@ -6,7 +6,9 @@ import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.datax.plugin.writer.rediswriter.Key;
 import com.alibaba.datax.plugin.writer.rediswriter.RedisWriteAbstract;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lijf@2345.com
@@ -39,20 +41,24 @@ public class HashTypeWriter extends RedisWriteAbstract {
             } else {
                 redisKey = keyPrefix + strKey + keySuffix;
             }
+            Map<String, String> m = new HashMap<>(hashFieldIndexs.size());
+            m.clear();
             // hash类型已数据源column名作为filed
             for (Configuration hashFieldIndex : hashFieldIndexs) {
                 String filed = hashFieldIndex.getString(Key.COL_NAME);
                 Integer index = hashFieldIndex.getInt(Key.COL_INDEX);
                 String value = record.getColumn(index).asString();
                 value = valuePrefix + value + valueSuffix;
-                pipelined.hset(redisKey, filed, value);
-                records++;
+                m.put(filed, value);
             }
+            pipelined.hmset(redisKey, m);
+
             // 若expire为-1，则设置此redisKey永不过期
             if (expire != -1) {
                 pipelined.expire(redisKey, expire);
             }
 
+            records++;
             // 若records超过batchSize，则开始同步写入
             if (records >= batchSize) {
                 syncData();
