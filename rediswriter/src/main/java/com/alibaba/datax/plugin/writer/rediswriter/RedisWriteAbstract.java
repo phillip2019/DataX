@@ -108,6 +108,8 @@ public abstract class RedisWriteAbstract {
         if (records > batchSize) {
             RedisWriterHelper.syncData(pipelined);
             records = 0;
+            // 重新获取pipeline
+            pipelined = RedisWriterHelper.getPipeLine(redisClient);
         }
     }
 
