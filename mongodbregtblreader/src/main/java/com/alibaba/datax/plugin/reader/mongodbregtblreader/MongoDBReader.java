@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import com.alibaba.fastjson.parser.Feature;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.mongodb.MongoClient;
@@ -236,7 +237,8 @@ public class MongoDBReader extends Reader {
 
             this.collection = readerSliceConfig.getString(KeyConstant.MONGO_COLLECTION_NAME);
             this.query = readerSliceConfig.getString(KeyConstant.MONGO_QUERY);
-            this.mongodbColumnMeta = JSON.parseArray(readerSliceConfig.getString(KeyConstant.MONGO_COLUMN));
+            // 修复读取配置无序，导致后续写入乱序问题
+            this.mongodbColumnMeta = JSONArray.parseObject(readerSliceConfig.getString(KeyConstant.MONGO_COLUMN).getBytes(), JSONArray.class, Feature.OrderedField);
             this.lowerBound = readerSliceConfig.get(KeyConstant.LOWER_BOUND);
             this.upperBound = readerSliceConfig.get(KeyConstant.UPPER_BOUND);
             this.isObjectId = readerSliceConfig.getBool(KeyConstant.IS_OBJECTID);
