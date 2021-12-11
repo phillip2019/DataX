@@ -303,7 +303,7 @@ public class RedisReader extends Reader {
                                     // 定制化解析BizCartQuery情况
                                     if (StringUtils.contains(ot.getKey(), "com.chinagoods.oms.biz.query.BizCartQuery")) {
                                         JSONObject jn = JSON.parseObject(ot.getKey());
-                                        LOG.info("Redis cart value: [{}]", jn.toString());
+                                        LOG.debug("Redis cart value: [{}]", jn.toString());
                                         if (cacheKey != null && cacheKey.split("_").length >= 3) {
                                             jo.put("userId", cacheKey.split("_")[2]);
                                         }
