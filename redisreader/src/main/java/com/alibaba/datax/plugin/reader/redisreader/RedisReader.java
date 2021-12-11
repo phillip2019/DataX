@@ -302,15 +302,14 @@ public class RedisReader extends Reader {
                                     JSONObject jo = new JSONObject();
                                     if (StringUtils.contains(ot.getKey(), "com.chinagoods.oms.biz.query.BizCartQuery")) {
                                         JSONObject jn = JSON.parseObject(ot.getKey());
-                                        if (jn != null) {
-                                            if (cacheKey != null && cacheKey.split("_").length >= 3) {
-                                                jo.put("userId", cacheKey.split("_")[2]);
-                                            }
-                                            jo.put("goodsId", jn.getString("goodsId"));
-                                            jo.put("goodsSkuId", jn.getString("goodsSkuId"));
-                                            resultList.add(jo);
-                                            break;
+                                        LOG.info("Redis cart value: [{}]", jn.toString());
+                                        if (cacheKey != null && cacheKey.split("_").length >= 3) {
+                                            jo.put("userId", cacheKey.split("_")[2]);
                                         }
+                                        jo.put("goodsId", jn.getString("goodsId"));
+                                        jo.put("goodsSkuId", jn.getString("goodsSkuId"));
+                                        resultList.add(jo);
+                                        break;
                                     }
                                     jo.put("hKey", ot.getKey());
                                     jo.put("hValue", ot.getValue());
