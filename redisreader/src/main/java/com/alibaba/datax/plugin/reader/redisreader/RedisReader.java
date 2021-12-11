@@ -309,6 +309,7 @@ public class RedisReader extends Reader {
                                         }
                                         jo.put("goodsId", jn.getString("goodsId"));
                                         jo.put("goodsSkuId", jn.getString("goodsSkuId"));
+                                        jo.put("quantity", ot.getValue());
                                     } else {
                                         jo.put("hKey", ot.getKey());
                                         jo.put("hValue", ot.getValue());
