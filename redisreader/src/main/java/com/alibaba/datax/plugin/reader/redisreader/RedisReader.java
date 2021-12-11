@@ -300,20 +300,20 @@ public class RedisReader extends Reader {
                                 for (Object o : ls) {
                                     Map.Entry<String, String> ot = (Map.Entry<String, String>)o;
                                     JSONObject jo = new JSONObject();
+                                    // 定制化解析BizCartQuery情况
                                     if (StringUtils.contains(ot.getKey(), "com.chinagoods.oms.biz.query.BizCartQuery")) {
                                         JSONObject jn = JSON.parseObject(ot.getKey());
                                         LOG.info("Redis cart value: [{}]", jn.toString());
                                         if (cacheKey != null && cacheKey.split("_").length >= 3) {
-                                            jo.put("userId", cacheKey.split("_")[2]);
+                                            jo.put("user_id", cacheKey.split("_")[2]);
                                         }
-                                        jo.put("goodsId", jn.getString("goodsId"));
-                                        jo.put("goodsSkuId", jn.getString("goodsSkuId"));
-                                        resultList.add(jo);
-                                        break;
+                                        jo.put("goods_id", jn.getString("goodsId"));
+                                        jo.put("goods_sku_id", jn.getString("goodsSkuId"));
+                                    } else {
+                                        jo.put("hKey", ot.getKey());
+                                        jo.put("hValue", ot.getValue());
+                                        jo.put("key", cacheKey);
                                     }
-                                    jo.put("hKey", ot.getKey());
-                                    jo.put("hValue", ot.getValue());
-                                    jo.put("key", cacheKey);
                                     resultList.add(jo);
                                 }
                                 break;
