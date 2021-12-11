@@ -6,6 +6,7 @@ import com.alibaba.datax.common.plugin.RecordSender;
 import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.common.spi.Reader;
 import com.alibaba.datax.common.util.Configuration;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,8 +16,6 @@ import redis.clients.jedis.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -301,6 +300,18 @@ public class RedisReader extends Reader {
                                 for (Object o : ls) {
                                     Map.Entry<String, String> ot = (Map.Entry<String, String>)o;
                                     JSONObject jo = new JSONObject();
+                                    if (StringUtils.contains(ot.getKey(), "com.chinagoods.oms.biz.query.BizCartQuery")) {
+                                        JSONObject jn = JSON.parseObject(ot.getKey());
+                                        if (jn != null) {
+                                            if (cacheKey != null && cacheKey.split("_").length >= 3) {
+                                                jo.put("userId", cacheKey.split("_")[2]);
+                                            }
+                                            jo.put("goodsId", jn.getString("goodsId"));
+                                            jo.put("goodsSkuId", jn.getString("goodsSkuId"));
+                                            resultList.add(jo);
+                                            break;
+                                        }
+                                    }
                                     jo.put("hKey", ot.getKey());
                                     jo.put("hValue", ot.getValue());
                                     jo.put("key", cacheKey);
@@ -405,5 +416,13 @@ public class RedisReader extends Reader {
             }
             LOG.debug("end read redis ...");
         }
+    }
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        String str = "{\"@class\":\"com.chinagoods.oms.biz.query.BizCartQuery\",\"goodsId\":2874228,\"goodsSkuId\":1435192700960288769}";
+        JSONObject jo = JSON.parseObject(str);
+        System.out.println(jo.getString("goodsId"));
+        System.out.println(jo.getString("goodsSkuId"));
+        System.out.println(jo);
     }
 }
