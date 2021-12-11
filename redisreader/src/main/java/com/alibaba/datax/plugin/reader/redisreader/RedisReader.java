@@ -305,10 +305,10 @@ public class RedisReader extends Reader {
                                         JSONObject jn = JSON.parseObject(ot.getKey());
                                         LOG.info("Redis cart value: [{}]", jn.toString());
                                         if (cacheKey != null && cacheKey.split("_").length >= 3) {
-                                            jo.put("user_id", cacheKey.split("_")[2]);
+                                            jo.put("userId", cacheKey.split("_")[2]);
                                         }
-                                        jo.put("goods_id", jn.getString("goodsId"));
-                                        jo.put("goods_sku_id", jn.getString("goodsSkuId"));
+                                        jo.put("goodsId", jn.getString("goodsId"));
+                                        jo.put("goodsSkuId", jn.getString("goodsSkuId"));
                                     } else {
                                         jo.put("hKey", ot.getKey());
                                         jo.put("hValue", ot.getValue());
