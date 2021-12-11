@@ -214,4 +214,26 @@ public class MongoDBReader extends Reader {
         }
 
     }
+
+    public static void main(String[] args) {
+        String listStr = "[{\"a\":  \"1\"}, {\"a\":  \"2\"}, {\"a\":  \"3\"}, {\"a\":  \"5\"}, {\"a\":  \"6\"}]";
+
+        for (int j = 0; j < 1000; j++) {
+            JSONArray jsonArray = JSONArray.parseObject(listStr.getBytes(), JSONArray.class);
+            Iterator iterator = jsonArray.iterator();
+            int i = 1;
+            while (iterator.hasNext()) {
+                JSONObject jsonObject = (JSONObject) iterator.next();
+//                System.out.println(String.format("%s=%s", jsonObject, i));
+                if (!jsonObject.getString("a").equals(String.valueOf(i))) {
+                    System.out.println("匹配失败，存在乱序");
+                }
+                if (i == 3) {
+                    i++;
+                }
+                i++;
+            }
+        }
+        System.out.println("匹配完成");
+    }
 }
