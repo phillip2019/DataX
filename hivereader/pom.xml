@@ -89,6 +89,7 @@
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-jdbc</artifactId>
             <version>${hive.version}</version>
+            <classifier>standalone</classifier>
 <!--            <version>2.3.3</version>-->
         </dependency>
 
