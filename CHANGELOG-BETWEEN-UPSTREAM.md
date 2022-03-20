@@ -26,6 +26,7 @@
 * 使用[个人维护者][2]维护的clickhouse reader/writer
 * 将clickhousereader配置到最终打包文件中
 * 恢复以日期作为release的tag_name和release_name
+* 增加hive reader
 
 ---
 
