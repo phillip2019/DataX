@@ -38,12 +38,11 @@ HiveReader实现了通过自定义SQL语句读取Hive表中全量或部分数据
                     "name": "hivereader",
                     "parameter": {
                         "sqls": [
-                            "select * from table1 where condition=1",
-                            "select * from table2 where condition=2"
+                            "select date_col from dim.dim_date where 1=1"
                         ],
-                        "jdbcUrl": "jdbc:hive2://ip:port",
+                        "jdbcUrl": "jdbc:hive2://172.18.5.14:10000",
                         "user": "hive",
-                        "password": ""
+                        "password": "hive"
                     }
 
                 },
