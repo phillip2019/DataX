@@ -40,7 +40,7 @@ HiveReader实现了通过自定义SQL语句读取Hive表中全量或部分数据
                         "sqls": [
                             "select date_col from dim.dim_date where 1=1"
                         ],
-                        "jdbcUrl": "jdbc:hive2://172.18.5.14:10000",
+                        "jdbcUrl": "jdbc:hive2://172.18.5.14:10000/dim",
                         "user": "hive",
                         "password": "hive"
                     }
