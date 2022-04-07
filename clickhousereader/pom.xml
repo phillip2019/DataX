@@ -38,9 +38,10 @@
             <version>${datax-project-version}</version>
         </dependency>
         <dependency>
-            <groupId>ru.yandex.clickhouse</groupId>
+            <!-- will stop using ru.yandex.clickhouse starting from 0.4.0 -->
+            <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.1.48</version>
+            <version>0.3.2-patch7</version>
         </dependency>
     </dependencies>
 

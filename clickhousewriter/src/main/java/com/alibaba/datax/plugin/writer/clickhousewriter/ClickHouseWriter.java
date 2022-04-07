@@ -52,7 +52,7 @@ public class ClickHouseWriter {
 
         @Override
         public void prepare() {
-            this.commonRdbmsWriterJob.privilegeValid(this.originalConfig, DATABASE_TYPE);
+//            this.commonRdbmsWriterJob.privilegeValid(this.originalConfig, DATABASE_TYPE);
             this.commonRdbmsWriterJob.prepare(this.originalConfig);
         }
 
