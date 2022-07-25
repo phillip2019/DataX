@@ -114,7 +114,7 @@ public class ClickHouseWriter {
 
             ClickHouseProperties properties = new ClickHouseProperties();
             // 设置默认超时时间为300s
-            properties.setSocketTimeout(300);
+            properties.setSocketTimeout(3600000);
             ClickHouseProperties withCredentials = properties.withCredentials(this.username, this.password);
             this.clickHouseDataSource = new BalancedClickhouseDataSource(this.jdbcUrl, withCredentials);
             BASIC_MESSAGE = String.format("jdbcUrl:[%s], DataSourceURL:%s ,table:[%s]",
