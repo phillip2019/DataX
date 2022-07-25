@@ -113,9 +113,10 @@ public class ClickHouseWriter {
             this.batchByteSize = writerSliceConfig.getInt(Key.BATCH_BYTE_SIZE, Constant.DEFAULT_BATCH_BYTE_SIZE);
 
             ClickHouseProperties properties = new ClickHouseProperties();
+            // 设置默认超时时间为300s
+            properties.setSocketTimeout(300);
             ClickHouseProperties withCredentials = properties.withCredentials(this.username, this.password);
             this.clickHouseDataSource = new BalancedClickhouseDataSource(this.jdbcUrl, withCredentials);
-
             BASIC_MESSAGE = String.format("jdbcUrl:[%s], DataSourceURL:%s ,table:[%s]",
                     this.jdbcUrl,clickHouseDataSource.getAllClickhouseUrls(), this.table);
         }
