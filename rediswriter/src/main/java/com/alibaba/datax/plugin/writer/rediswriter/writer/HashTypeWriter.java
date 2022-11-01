@@ -43,13 +43,14 @@ public class HashTypeWriter extends RedisWriteAbstract {
             }
             Map<String, String> m = new HashMap<>(hashFieldIndexs.size());
             m.clear();
-            // hash类型已数据源column名作为filed
+            // hash类型已数据源column中值作为hash key
             for (Configuration hashFieldIndex : hashFieldIndexs) {
-                String filed = hashFieldIndex.getString(Key.COL_NAME);
+                Integer nameIndex = hashFieldIndex.getInt(Key.COL_NAME);
+                String nameValue = record.getColumn(nameIndex).asString();
                 Integer index = hashFieldIndex.getInt(Key.COL_INDEX);
                 String value = record.getColumn(index).asString();
                 value = valuePrefix + value + valueSuffix;
-                m.put(filed, value);
+                m.put(nameValue, value);
             }
             pipelined.hmset(redisKey, m);
 
