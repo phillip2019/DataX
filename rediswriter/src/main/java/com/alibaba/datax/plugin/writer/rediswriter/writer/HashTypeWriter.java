@@ -5,10 +5,15 @@ import com.alibaba.datax.common.plugin.RecordReceiver;
 import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.datax.plugin.writer.rediswriter.Key;
 import com.alibaba.datax.plugin.writer.rediswriter.RedisWriteAbstract;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.alibaba.datax.plugin.writer.rediswriter.Constant.HASH_KEY_DYNAMIC;
+import static com.alibaba.datax.plugin.writer.rediswriter.Constant.HASH_KEY_STATIC;
 
 /**
  * @author lijf@2345.com
@@ -16,7 +21,11 @@ import java.util.Map;
  * @desc hash类型写redis
  */
 public class HashTypeWriter extends RedisWriteAbstract {
+    private static final Logger LOG = LoggerFactory.getLogger(HashTypeWriter.class);
+
     List<Configuration> hashFieldIndexs;
+
+    String hashKey;
 
     public HashTypeWriter(Configuration configuration) {
         super(configuration);
@@ -28,6 +37,7 @@ public class HashTypeWriter extends RedisWriteAbstract {
         Configuration detailConfig = configuration.getConfiguration(Key.CONFIG);
         // hash类型默认以数据源对应的列名作为hash的filed名
         hashFieldIndexs = detailConfig.getListConfiguration(Key.COLVALUE);
+        hashKey = detailConfig.getString(Key.HASH_KEY);
     }
 
     @Override
@@ -43,10 +53,20 @@ public class HashTypeWriter extends RedisWriteAbstract {
             }
             Map<String, String> m = new HashMap<>(hashFieldIndexs.size());
             m.clear();
+
+            String nameValue;
             // hash类型已数据源column中值作为hash key
             for (Configuration hashFieldIndex : hashFieldIndexs) {
-                Integer nameIndex = hashFieldIndex.getInt(Key.COL_NAME);
-                String nameValue = record.getColumn(nameIndex).asString();
+                nameValue = null;
+                if (HASH_KEY_DYNAMIC.equals(hashKey)) {
+                    Integer nameIndex = hashFieldIndex.getInt(Key.COL_NAME);
+                    nameValue = record.getColumn(nameIndex).asString();
+                } else if (HASH_KEY_STATIC.equals(hashKey)) {
+                    nameValue = hashFieldIndex.getString(Key.COL_NAME);
+                } else {
+                    LOG.info("错误hashKey类型， 当前hashKey类型为: {}, 允许的hashKey为: {}、{}", hashKey, HASH_KEY_DYNAMIC, HASH_KEY_STATIC);
+                    System.exit(-1);
+                }
                 Integer index = hashFieldIndex.getInt(Key.COL_INDEX);
                 String value = record.getColumn(index).asString();
                 value = valuePrefix + value + valueSuffix;

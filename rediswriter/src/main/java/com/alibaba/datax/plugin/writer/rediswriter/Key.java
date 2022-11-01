@@ -10,8 +10,14 @@ public class Key {
 
     //对应redis的数据类型，目前支持三种，string，list，hash
     public final static String WRITE_TYPE = "writeType";
+    
+    /**
+     * hash key的模式
+     * 可选值为： dynamic(动态);  static(静态)
+     **/
+    public final static String HASH_KEY = "hashKey";
 
-    //对应redis key值的hive列配置
+    // 对应redis key值的hive列配置
     public final static String COLKEY = "colKey";
 
     //数据库列名
@@ -19,7 +25,7 @@ public class Key {
     //数据库列索引
     public final static String COL_INDEX = "index";
 
-    //对应redis value值的hive列
+    // 对应redis value值的hive列
     public final static String COLVALUE = "colValue";
     //redis key值的前缀，非必须
     public final static String KEY_PREFIX = "keyPrefix";

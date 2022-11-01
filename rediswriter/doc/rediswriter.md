@@ -79,9 +79,10 @@ rediswriter支持导入redis的数据类型有：
             "writeType":"hash",
             "config":{
               "colKey":{"name":"uid","index":0},
-              "colValue":[{"name":"channels","index":1},{"name":"name","index":2}],
+              "colValue":[{"name":1, "index":2}],
               "valueDelimiter": ",",
-              "expire":300,
+              "hashKey": "dynamic",
+              "expire": 300,
               "keyPrefix":"datax:hash:"
             }
           }
@@ -175,6 +176,14 @@ rediswriter支持导入redis的数据类型有：
 	* 必选：否 <br />
 
 	* 默认值：-1 <br />
+
+* **hashKey**
+
+	* 描述：(公共参数)redis hash key的模式，可选值为: dynamic(动态);  static(静态)<br />
+
+	* 必选：否 <br />
+
+	* 默认值：dynamic <br />	
 
 * **batchSize**
 

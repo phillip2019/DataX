@@ -31,4 +31,7 @@ public final class Constant {
     public static final String LIST_PUSH_TYPE_LPUSH = "lpush";
     public static final String LIST_PUSH_TYPE_RPUSH = "rpush";
 
+    public static final String HASH_KEY_DYNAMIC = "dynamic";
+    public static final String HASH_KEY_STATIC = "static";
+
 }
