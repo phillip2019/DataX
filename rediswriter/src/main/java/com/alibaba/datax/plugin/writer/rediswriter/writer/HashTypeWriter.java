@@ -73,7 +73,7 @@ public class HashTypeWriter extends RedisWriteAbstract {
                 m.put(nameValue, value);
             }
             // 先删除旧数据
-            pipelined.del(redisKey);
+            pipelined.unlink(redisKey);
             pipelined.hset(redisKey, m);
 
             // 若expire为-1，则设置此redisKey永不过期
