@@ -216,7 +216,7 @@ public class HiveReader extends Reader {
 
                         case Types.NUMERIC:
                         case Types.DECIMAL:
-                            record.addColumn(new DoubleColumn(rs.getString(i)));
+                            record.addColumn(new StringColumn(rs.getString(i)));
                             break;
 
                         case Types.FLOAT:

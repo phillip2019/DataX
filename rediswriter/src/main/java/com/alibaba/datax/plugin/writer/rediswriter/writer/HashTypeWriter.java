@@ -55,7 +55,7 @@ public class HashTypeWriter extends RedisWriteAbstract {
             m.clear();
 
             String nameValue;
-            // hash类型已数据源column中值作为hash key
+            // hash类型以数据源column中值作为hash key
             for (Configuration hashFieldIndex : hashFieldIndexs) {
                 nameValue = null;
                 if (HASH_KEY_DYNAMIC.equals(hashKey)) {

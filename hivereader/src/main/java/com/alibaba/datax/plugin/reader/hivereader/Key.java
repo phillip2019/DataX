@@ -22,4 +22,15 @@ public final class Key {
     public static final String KERBEROS_KEYTAB_FILE_PATH = "kerberosKeytabFilePath";
     public static final String KERBEROS_PRINCIPAL = "kerberosPrincipal";
 
+    /**
+     * hive执行引擎，默认为mr
+     **/
+    public static final String HIVE_EXECUTION_ENGINE = "hive.execution.engine";
+
+    /**
+     * 任务名称
+     **/
+    public static final String MAPRED_JOB_NAME = "mapred.job.name";
+    public static final String SPARK_APP_NAME = "spark.app.name";
+
 }

@@ -21,6 +21,7 @@ import static com.alibaba.datax.plugin.reader.hivereader.Constant.MAX_TRY_TIMES;
 public class DBUtil {
     private static final Logger LOG = LoggerFactory.getLogger(DBUtil.class);
 
+    public static final String HIVE_CONF_FORMAT = "hiveconf:%s";
     private DBUtil() {}
 
     public static ResultSet query(Connection conn, String sql)
@@ -75,6 +76,14 @@ public class DBUtil {
             String kerberosPrincipal = taskConfig.getString(Key.KERBEROS_PRINCIPAL);
             kerberosAuthentication(kerberosPrincipal, kerberosKeytabFilePath);
         }
+
+        // 设置应用名和执行引擎
+        String hiveExecutionEngine = taskConfig.getString(Key.HIVE_EXECUTION_ENGINE, "mr");
+        prop.put(String.format(HIVE_CONF_FORMAT, Key.HIVE_EXECUTION_ENGINE), hiveExecutionEngine);
+        String appName = taskConfig.getString(Key.MAPRED_JOB_NAME, "export_hive_data2xx");
+        prop.put(String.format(HIVE_CONF_FORMAT, Key.MAPRED_JOB_NAME), appName);
+        prop.put(String.format(HIVE_CONF_FORMAT, Key.SPARK_APP_NAME), appName);
+
         try {
             Class.forName("org.apache.hive.jdbc.HiveDriver");
             DriverManager.setLoginTimeout(Constant.TIMEOUT_SECONDS);
