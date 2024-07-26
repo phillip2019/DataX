@@ -25,12 +25,12 @@ public final class Key {
     /**
      * hive执行引擎，默认为mr
      **/
-    public static final String HIVE_EXECUTION_ENGINE = "hive.execution.engine";
+    public static final String HIVE_EXECUTION_ENGINE = "hive_execution_engine";
 
     /**
      * 任务名称
      **/
-    public static final String MAPRED_JOB_NAME = "mapred.job.name";
-    public static final String SPARK_APP_NAME = "spark.app.name";
+    public static final String MAPRED_JOB_NAME = "mapred_job_name";
+    public static final String SPARK_APP_NAME = "spark_app_name";
 
 }

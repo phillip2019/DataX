@@ -79,10 +79,10 @@ public class DBUtil {
 
         // 设置应用名和执行引擎
         String hiveExecutionEngine = taskConfig.getString(Key.HIVE_EXECUTION_ENGINE, "mr");
-        prop.put(String.format(HIVE_CONF_FORMAT, Key.HIVE_EXECUTION_ENGINE), hiveExecutionEngine);
+        prop.put(String.format(HIVE_CONF_FORMAT, Key.HIVE_EXECUTION_ENGINE).replace("_", "."), hiveExecutionEngine);
         String appName = taskConfig.getString(Key.MAPRED_JOB_NAME, "export_hive_data2xx");
-        prop.put(String.format(HIVE_CONF_FORMAT, Key.MAPRED_JOB_NAME), appName);
-        prop.put(String.format(HIVE_CONF_FORMAT, Key.SPARK_APP_NAME), appName);
+        prop.put(String.format(HIVE_CONF_FORMAT, Key.MAPRED_JOB_NAME).replace("_", "."), appName);
+        prop.put(String.format(HIVE_CONF_FORMAT, Key.SPARK_APP_NAME).replace("_", "."), appName);
         LOG.info("set hive execution engine: {}", hiveExecutionEngine);
         LOG.info("set mapred job name: {}", appName);
         try {
