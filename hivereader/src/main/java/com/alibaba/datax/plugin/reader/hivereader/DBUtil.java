@@ -83,7 +83,8 @@ public class DBUtil {
         String appName = taskConfig.getString(Key.MAPRED_JOB_NAME, "export_hive_data2xx");
         prop.put(String.format(HIVE_CONF_FORMAT, Key.MAPRED_JOB_NAME), appName);
         prop.put(String.format(HIVE_CONF_FORMAT, Key.SPARK_APP_NAME), appName);
-
+        LOG.info("set hive execution engine: {}", hiveExecutionEngine);
+        LOG.info("set mapred job name: {}", appName);
         try {
             Class.forName("org.apache.hive.jdbc.HiveDriver");
             DriverManager.setLoginTimeout(Constant.TIMEOUT_SECONDS);
