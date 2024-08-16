@@ -59,6 +59,7 @@ public class RedisWriter extends Writer {
             this.taskConfig = super.getPluginJobConf();
             String writeType = taskConfig.getString(Key.WRITE_TYPE);
             String writeMode = taskConfig.getString(Key.WRITE_MODE);
+
             LOG.info("当前写入模式为： {}", Key.WRITE_MODE);
             // 判断是delete还是insert
             if (Constant.WRITE_MODE_DELETE.equalsIgnoreCase(writeMode)) {
@@ -82,6 +83,7 @@ public class RedisWriter extends Writer {
             }
             writer.checkAndGetParams();
             writer.initCommonParams();
+            writer.deleteOldData();
         }
 
         @Override

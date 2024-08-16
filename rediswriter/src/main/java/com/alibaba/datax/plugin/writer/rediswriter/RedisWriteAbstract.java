@@ -5,7 +5,12 @@ import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.plugin.RecordReceiver;
 import com.alibaba.datax.common.util.Configuration;
 import org.apache.commons.lang3.StringUtils;
-import redis.clients.jedis.PipelineBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -14,6 +19,8 @@ import redis.clients.jedis.PipelineBase;
  * @desc 写redis对象抽象类
  */
 public abstract class RedisWriteAbstract {
+    private static final Logger logger = LoggerFactory.getLogger(RedisWriteAbstract.class);
+
     protected Configuration configuration;
     protected PipelineBase pipelined;
     Object redisClient;
@@ -99,6 +106,45 @@ public abstract class RedisWriteAbstract {
      */
     public abstract void addToPipLine(RecordReceiver lineReceiver);
 
+    /**
+     * 先删除老数据
+     **/
+    public void deleteOldData() {
+        logger.info("Start delete old data, keyPrefix: {}", keyPrefix);
+        List<String> keyResultList = new ArrayList<>();
+        String cursor = ScanParams.SCAN_POINTER_START;
+
+        ScanParams params = new ScanParams().count(batchSize).match(keyPrefix + "*");
+
+        do {
+            ScanResult<String> scanResult;
+            if (redisClient instanceof Jedis) {
+                scanResult = ((Jedis) redisClient).scan(cursor, params);
+            } else if (redisClient instanceof JedisCluster) {
+                scanResult = ((JedisCluster) redisClient).scan(cursor, params);
+            } else {
+                throw new IllegalArgumentException("Unsupported JedisCommands implementation");
+            }
+            List<String> keys = scanResult.getResult();
+            keyResultList.addAll(keys);
+            cursor = scanResult.getCursor();
+            // 如果游标值为0，表示遍历完整个数据库，退出循环
+        } while (!"0".equals(cursor));
+
+        if (keyResultList.isEmpty()) {
+            return;
+        }
+        logger.info("Delete old data size: {}", keyResultList.size());
+        // 删除所有keyResultList,按批次删除，一批batchSize条，使用pipelined
+        for (int i = 0; i < keyResultList.size(); i += batchSize) {
+            List<String> subList = keyResultList.subList(i, Math.min(i + batchSize, keyResultList.size()));
+            for (String key : subList) {
+                pipelined.del(key);
+            }
+            this.syncData();
+        }
+        logger.info("End delete old data, keyPrefix: {}, deleted size: {}", keyPrefix, keyResultList.size());
+    }
 
     /**
      * 正式写入数据到redis
