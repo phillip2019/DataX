@@ -324,7 +324,7 @@ public class CommonRdbmsWriter {
             int tableNumber = writerSliceConfig.getInt(
                     Constant.TABLE_NUMBER_MARK);
 
-            boolean hasPostSql = (this.postSqls != null && this.postSqls.size() > 0);
+            boolean hasPostSql = (this.postSqls != null && !this.postSqls.isEmpty());
             if (tableNumber == 1 || !hasPostSql) {
                 return;
             }

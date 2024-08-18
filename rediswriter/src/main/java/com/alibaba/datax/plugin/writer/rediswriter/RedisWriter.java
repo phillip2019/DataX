@@ -54,6 +54,8 @@ public class RedisWriter extends Writer {
             writer.syncData();
         }
 
+
+
         @Override
         public void init() {
             this.taskConfig = super.getPluginJobConf();

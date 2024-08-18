@@ -25,6 +25,8 @@ public abstract class RedisWriteAbstract {
     protected PipelineBase pipelined;
     Object redisClient;
     protected int records;
+    private long totalRecordsWritten = 0;
+
     protected String keyPrefix;
     protected String keySuffix;
     protected String valuePrefix;
@@ -147,6 +149,7 @@ public abstract class RedisWriteAbstract {
         }
         this.syncAllData();
         logger.info("End delete old data, keyPrefix: {}, deleted size: {}", keyPrefix, keyResultList.size());
+        totalRecordsWritten = 0;
     }
 
     /**
@@ -156,6 +159,8 @@ public abstract class RedisWriteAbstract {
         // 若数据大于0，开始写入同步数据
         if (records >= batchSize) {
             RedisWriterHelper.syncData(pipelined);
+            // 处理数据写入
+            totalRecordsWritten += records;
             records = 0;
         }
     }
