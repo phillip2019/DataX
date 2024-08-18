@@ -145,6 +145,7 @@ public abstract class RedisWriteAbstract {
             this.syncData();
             logger.info("Delete old data, total size: {}, process percentage: {}", keyResultList.size(), (i + batchSize) * 100.0 / keyResultList.size());
         }
+        this.syncAllData();
         logger.info("End delete old data, keyPrefix: {}, deleted size: {}", keyPrefix, keyResultList.size());
     }
 
