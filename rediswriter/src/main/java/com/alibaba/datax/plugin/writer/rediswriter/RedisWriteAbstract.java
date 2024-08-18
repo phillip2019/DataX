@@ -153,7 +153,7 @@ public abstract class RedisWriteAbstract {
      */
     public void syncData() {
         // 若数据大于0，开始写入同步数据
-        if (records > batchSize) {
+        if (records >= batchSize) {
             RedisWriterHelper.syncData(pipelined);
             records = 0;
         }
