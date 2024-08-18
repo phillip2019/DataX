@@ -140,6 +140,7 @@ public abstract class RedisWriteAbstract {
             List<String> subList = keyResultList.subList(i, Math.min(i + batchSize, keyResultList.size()));
             for (String key : subList) {
                 pipelined.del(key);
+                records++;
             }
             this.syncData();
             logger.info("Delete old data, total size: {}, process percentage: {}", keyResultList.size(), (i + batchSize) * 100.0 / keyResultList.size());
