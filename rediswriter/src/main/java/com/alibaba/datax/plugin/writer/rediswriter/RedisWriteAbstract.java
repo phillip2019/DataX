@@ -142,6 +142,7 @@ public abstract class RedisWriteAbstract {
                 pipelined.del(key);
             }
             this.syncData();
+            logger.info("Delete old data, total size: {}, process percentage: {}", keyResultList.size(), (i + batchSize) * 100.0 / keyResultList.size());
         }
         logger.info("End delete old data, keyPrefix: {}, deleted size: {}", keyPrefix, keyResultList.size());
     }
