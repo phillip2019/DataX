@@ -254,6 +254,7 @@ public class SingleTableSplitUtil {
 
         switch (SingleTableSplitUtil.DATABASE_TYPE) {
             case Oracle:
+            case PostgreSQL:
                 isValidLongType |= type == Types.NUMERIC;
                 break;
             default:
