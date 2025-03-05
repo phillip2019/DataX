@@ -1,0 +1,6 @@
+{
+    "name": "rocketmqwriter",
+    "class": "com.alibaba.datax.plugin.writer.rocketmqwriter.RocketMQWriter",
+    "description": "RocketMQ writer plugin for DataX",
+    "developer": "datax-team"
+}

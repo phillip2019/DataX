@@ -1,0 +1,19 @@
+{
+    "name": "rocketmqwriter",
+    "parameter": {
+        "namesrvAddr": "localhost:9876",
+        "topic": "datax_topic",
+        "tag": "",
+        "producerGroup": "datax_producer_group",
+        "mode": "normal",
+        "accessKey": "",
+        "secretKey": "",
+        "keyField": "",
+        "maxRetryCount": 3,
+        "maxBatchSize": 32,
+        "maxBatchByteSize": 4194304,
+        "messageSerializer": "json",
+        "sendTimeoutMillis": 3000,
+        "column": ["*"]
+    }
+}
