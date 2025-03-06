@@ -130,6 +130,7 @@ public class RocketMQWriter extends Writer {
         private int keyFieldIndex;
         private MessageSerializer serializer;
         private int[] columnIndex;
+        private String[] columnNameArr;
 
         @Override
         public void init() {
@@ -154,6 +155,7 @@ public class RocketMQWriter extends Writer {
             // 处理列映射
             List<String> column = this.taskConfig.getList(Key.CONFIG_KEY_COLUMN, String.class);
             this.columnIndex = new int[column == null ? 0 : column.size()];
+            this.columnNameArr = new String[column == null ? 0 : column.size()];
             if (column != null && !column.isEmpty()) {
                 // 如果只有一个元素且为"*"，表示使用所有列
                 if (column.size() == 1 && "*".equals(column.get(0))) {
@@ -163,6 +165,7 @@ public class RocketMQWriter extends Writer {
                     for (int i = 0; i < column.size(); i++) {
                         String col = column.get(i);
                         this.columnIndex[i] = i;
+                        this.columnNameArr[i] = col;
                         if (StringUtils.equals(col, keyField)) {
                             this.keyFieldIndex = i;
                         }
@@ -229,7 +232,7 @@ public class RocketMQWriter extends Writer {
             
             for (Record record : recordBatch) {
                 try {
-                    byte[] messageBody = serializer.serialize(record, columnIndex);
+                    byte[] messageBody = serializer.serialize(record, columnIndex, columnNameArr);
                     if (messageBody == null || messageBody.length == 0) {
                         latch.countDown();
                         continue;
@@ -286,7 +289,7 @@ public class RocketMQWriter extends Writer {
             
             for (Record record : recordBatch) {
                 try {
-                    byte[] messageBody = serializer.serialize(record, columnIndex);
+                    byte[] messageBody = serializer.serialize(record, columnIndex, columnNameArr);
                     if (messageBody == null || messageBody.length == 0) {
                         continue;
                     }
@@ -336,7 +339,7 @@ public class RocketMQWriter extends Writer {
             
             for (Record record : recordBatch) {
                 try {
-                    byte[] messageBody = serializer.serialize(record, columnIndex);
+                    byte[] messageBody = serializer.serialize(record, columnIndex, columnNameArr);
                     if (messageBody == null || messageBody.length == 0) {
                         continue;
                     }

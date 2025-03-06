@@ -16,19 +16,20 @@ public class MessageSerializerImpl implements MessageSerializer {
     
     // 实现接口的方法
     @Override
-    public byte[] serialize(Record record, int[] columnMapping) {
+    public byte[] serialize(Record record, int[] columnMapping, String[] columnNames) {
         // 默认使用JSON序列化
-        return new JsonSerializer().serialize(record, columnMapping);
+        return new JsonSerializer().serialize(record, columnMapping, columnNames);
     }
 
     public static class JsonSerializer implements MessageSerializer {
         @Override
-        public byte[] serialize(Record record, int[] columnMapping) {
+        public byte[] serialize(Record record, int[] columnMapping, String[] columnNames) {
             try {
                 Map<String, Object> jsonMap = new HashMap<>();
                 for (int i = 0; i < columnMapping.length; i++) {
                     Column column = record.getColumn(i);
-                    String columnName = "column_" + columnMapping[i];
+//                    String columnName = "column_" + columnMapping[i];
+                    String columnName = columnNames[i];
                     
                     if (column.getRawData() == null) {
                         jsonMap.put(columnName, null);
@@ -68,7 +69,7 @@ public class MessageSerializerImpl implements MessageSerializer {
     
     public static class StringSerializer implements MessageSerializer {
         @Override
-        public byte[] serialize(Record record, int[] columnMapping) {
+        public byte[] serialize(Record record, int[] columnMapping, String[] columnNames) {
             try {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < columnMapping.length; i++) {
@@ -91,7 +92,7 @@ public class MessageSerializerImpl implements MessageSerializer {
     
     public static class BytesSerializer implements MessageSerializer {
         @Override
-        public byte[] serialize(Record record, int[] columnMapping) {
+        public byte[] serialize(Record record, int[] columnMapping, String[] columnNames) {
             try {
                 // 只取第一列作为字节数组内容
                 if (columnMapping.length > 0) {
