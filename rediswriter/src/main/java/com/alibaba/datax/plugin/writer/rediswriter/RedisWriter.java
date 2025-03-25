@@ -61,7 +61,7 @@ public class RedisWriter extends Writer {
         public void init() {
             this.taskConfig = super.getPluginJobConf();
             String writeType = taskConfig.getString(Key.WRITE_TYPE);
-            String writeMode = taskConfig.getString(Key.WRITE_MODE);
+            String writeMode = taskConfig.getString(Key.WRITE_MODE, Constant.WRITE_MODE_INSERT);
 
             LOG.info("当前写入模式为： {}", Key.WRITE_MODE);
             // 判断是delete还是insert
