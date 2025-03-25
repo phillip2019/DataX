@@ -1,0 +1,56 @@
+{
+  "job": {
+    "setting": {
+      "speed": {
+        "channel": 1
+      }
+    },
+    "content": [
+      {
+        "reader": {
+          "name": "streamreader",
+          "parameter": {
+            "column": [
+              {
+                "value": "user001",
+                "type": "string"
+              },
+              {
+                "value": "tag1,tag2,tag3",
+                "type": "string"
+              }
+            ],
+            "sliceRecordCount": 1000
+          }
+        },
+        "writer": {
+          "name": "rediswriter",
+          "parameter": {
+            "redisMode": "singleton",
+            "address": "127.0.0.1:6379",
+            "auth": "",
+            "writeType": "set",
+            "writeMode": "insert",
+            "config": {
+              "colKey": {
+                "index": 0,
+                "name": "key"
+              },
+              "colValue": {
+                "index": 1,
+                "name": "value"
+              },
+              "valueDelimiter": ",",
+              "keyPrefix": "user:tags:",
+              "keySuffix": "",
+              "valuePrefix": "",
+              "valueSuffix": "",
+              "expire": 86400,
+              "batchSize": 1000
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -29,10 +29,14 @@ rediswriter支持导入redis的数据类型有：
 
 3. hash
 
+4. set
+
 ## 3 功能说明
 
 
 ### 3.1 配置样例
+
+#### 3.1.1 Hash类型配置样例
 
 ```json
 {
@@ -93,6 +97,107 @@ rediswriter支持导入redis的数据类型有：
 }
 ```
 
+#### 3.1.2 Set类型配置样例
+
+```json
+{
+  "job": {
+    "setting": {
+      "speed": {
+        "channel": 1
+      }
+    },
+    "content": [
+      {
+        "reader": {
+          "name": "mysqlreader",
+          "parameter": {
+            "username": "user",
+            "password": "password",
+            "column": ["product_id"],
+            "where": "quality_score > 80 AND stock > 0",
+            "connection": [
+              {
+                "table": ["products"],
+                "jdbcUrl": ["jdbc:mysql://localhost:3306/db_products"]
+              }
+            ]
+          }
+        },
+        "writer": {
+          "name": "rediswriter",
+          "parameter": {
+            "redisMode": "singleton",
+            "address": "127.0.0.1:6379",
+            "auth": "password",
+            "writeType": "set",
+            "config": {
+              "strKey": "pool:recommended",
+              "colValue": {
+                "index": 0,
+                "name": "product_id"
+              },
+              "expire": 86400,
+              "batchSize": 5000
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+#### 3.1.3 Set类型带分隔符的配置样例
+
+```json
+{
+  "job": {
+    "content": [
+      {
+        "reader": {
+          "name": "streamreader",
+          "parameter": {
+            "column": [
+              {
+                "value": "user001",
+                "type": "string"
+              },
+              {
+                "value": "tag1,tag2,tag3",
+                "type": "string"
+              }
+            ],
+            "sliceRecordCount": 1000
+          }
+        },
+        "writer": {
+          "name": "rediswriter",
+          "parameter": {
+            "redisMode": "singleton",
+            "address": "127.0.0.1:6379",
+            "writeType": "set",
+            "config": {
+              "colKey": {
+                "index": 0,
+                "name": "key"
+              },
+              "colValue": {
+                "index": 1,
+                "name": "value"
+              },
+              "valueDelimiter": ",",
+              "keyPrefix": "user:tags:",
+              "expire": 86400
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
 ### 3.2 参数说明
 
 ### 3.2.1 一级参数
@@ -131,7 +236,7 @@ rediswriter支持导入redis的数据类型有：
 
 * **writeType**
 
-	* 描述：写入redis的数据类型：string、list、hash	  <br />
+	* 描述：写入redis的数据类型：string、list、hash、set	  <br />
 
 	* 必选：是 <br />
 
@@ -252,6 +357,14 @@ rediswriter支持导入redis的数据类型有：
 	* 描述：(redis hash类型参数)hash类型要删除的field，逗号隔开，次参数只对删除hash类型的field时有效。 <br />
 
 	* 必选：删除hash类型field时必需 <br />
+
+	* 默认值：无 <br />
+
+* **valueDelimiter**
+
+	* 描述：(redis set类型参数)对应数据源column值的分隔符，可用于将一个字段值拆分为多个成员加入到集合中。如果不设置，则整个值作为一个成员。<br />
+
+	* 必选：否 <br />
 
 	* 默认值：无 <br />
 

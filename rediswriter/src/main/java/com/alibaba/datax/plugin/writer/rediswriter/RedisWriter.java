@@ -8,6 +8,7 @@ import com.alibaba.datax.common.util.Configuration;
 import com.alibaba.datax.plugin.writer.rediswriter.writer.DeleteWriter;
 import com.alibaba.datax.plugin.writer.rediswriter.writer.HashTypeWriter;
 import com.alibaba.datax.plugin.writer.rediswriter.writer.ListTypeWriter;
+import com.alibaba.datax.plugin.writer.rediswriter.writer.SetTypeWriter;
 import com.alibaba.datax.plugin.writer.rediswriter.writer.StringTypeWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class RedisWriter extends Writer {
             // 判断是delete还是insert
             if (Constant.WRITE_MODE_DELETE.equalsIgnoreCase(writeMode)) {
                 writer = new DeleteWriter(taskConfig);
-            } else {
+            } else if (Constant.WRITE_MODE_INSERT.equalsIgnoreCase(writeMode)) {
                 // 判断写redis的数据类型，string，list，hash
                 switch (writeType) {
                     case Constant.WRITE_TYPE_HASH:
@@ -78,10 +79,15 @@ public class RedisWriter extends Writer {
                     case Constant.WRITE_TYPE_STRING:
                         writer = new StringTypeWriter(taskConfig);
                         break;
+                    case Constant.WRITE_TYPE_SET:
+                        writer = new SetTypeWriter(taskConfig);
+                        break;
                     default:
                         throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "redisWriter 不支持此数据类型:" + writeType);
                 }
 
+            } else {
+                throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "redisWriter 不支持此操作类型:" + writeMode);
             }
             writer.checkAndGetParams();
             writer.initCommonParams();

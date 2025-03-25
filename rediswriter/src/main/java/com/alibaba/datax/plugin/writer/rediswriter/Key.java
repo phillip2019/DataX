@@ -53,6 +53,9 @@ public class Key {
 
     // redis list类型对应数据源column值的分隔符,只支持string类型的数据源column
     public final static String LIST_VALUE_DELIMITER = "valueDelimiter";
+    
+    // redis set类型对应数据源column值的分隔符,只支持string类型的数据源column
+    public final static String SET_VALUE_DELIMITER = "valueDelimiter";
 
     // hash类型要删除的field，次参数只对删除hash类型的field时有效
     public final static String HASH_DELETE_FILEDS = "hashFields";

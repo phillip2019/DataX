@@ -12,11 +12,12 @@ public final class Constant {
     public static final String CLUSTER = "cluster";
 
     /**
-     * 支持的redis的三种数据类型
+     * 支持的redis的四种数据类型
      **/
     public static final String WRITE_TYPE_STRING = "string";
     public static final String WRITE_TYPE_LIST= "list";
     public static final String WRITE_TYPE_HASH = "hash";
+    public static final String WRITE_TYPE_SET = "set";
 
     /**
      * 两种redis的操作类型，delete和insert
