@@ -77,6 +77,7 @@ public abstract class RedisWriteAbstract {
 
         String colKey = detailConfig.getString(Key.COLKEY, null);
         String strKey = detailConfig.getString(Key.STRING_KEY, null);
+        String keyPrefix = detailConfig.getString(Key.KEY_PREFIX, null);
 
         if ((StringUtils.isBlank(colKey) && StringUtils.isBlank(strKey))) {
             throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "strKey或colKey不能为空！请检查配置");
