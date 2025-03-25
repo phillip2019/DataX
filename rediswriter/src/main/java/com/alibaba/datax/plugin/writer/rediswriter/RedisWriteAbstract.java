@@ -94,6 +94,11 @@ public abstract class RedisWriteAbstract {
         if (StringUtils.isNotBlank(colKey) && StringUtils.isBlank(colValue)) {
             throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "colValue不能为空！请检查配置");
         }
+
+        // 若keyPrefix为空，则报错，不允许删除所有数据
+        if (StringUtils.isBlank(keyPrefix)) {
+            throw DataXException.asDataXException(CommonErrorCode.CONFIG_ERROR, "keyPrefix参数不能为空！请检查配置");
+        }
         String writeType = configuration.getString(Key.WRITE_TYPE);
         // hash类型的colValue配置里面有多个column，要考虑排除获取valueIndex，HashTypeWriter子类单独处理
         if (!Constant.WRITE_TYPE_HASH.equalsIgnoreCase(writeType)) {
@@ -115,7 +120,6 @@ public abstract class RedisWriteAbstract {
         logger.info("Start delete old data, keyPrefix: {}", keyPrefix);
         List<String> keyResultList = new ArrayList<>();
         String cursor = ScanParams.SCAN_POINTER_START;
-
         ScanParams params = new ScanParams().count(batchSize).match(keyPrefix + "*");
 
         do {
