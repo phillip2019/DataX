@@ -113,7 +113,6 @@ public abstract class RedisWriteAbstract {
      * 先删除老数据
      **/
     public void deleteOldData() {
-        logger.info("Start delete old data, keyPrefix: {}", keyPrefix);
         List<String> keyResultList = new ArrayList<>();
         String cursor = ScanParams.SCAN_POINTER_START;
         String redisKeyPattern = "";
@@ -123,6 +122,7 @@ public abstract class RedisWriteAbstract {
             redisKeyPattern = keyPrefix + strKey;
         }
         redisKeyPattern += "*";
+        logger.info("Start delete old data, key pattern: {}", redisKeyPattern);
         ScanParams params = new ScanParams().count(batchSize).match(redisKeyPattern);
 
         do {
